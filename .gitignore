@@ -1,29 +1,83 @@
-echo # Dependencies > .gitignore
-echo node_modules/ >> .gitignore
-echo. >> .gitignore
-echo # Build outputs >> .gitignore
-echo frontend/.next/ >> .gitignore
-echo frontend/out/ >> .gitignore
-echo frontend/build/ >> .gitignore
-echo backend/target/ >> .gitignore
-echo. >> .gitignore
-echo # Environment variables >> .gitignore
-echo .env >> .gitignore
-echo .env.local >> .gitignore
-echo .env*.local >> .gitignore
-echo. >> .gitignore
-echo # IDE >> .gitignore
-echo .vscode/ >> .gitignore
-echo .idea/ >> .gitignore
-echo *.iml >> .gitignore
-echo. >> .gitignore
-echo # OS >> .gitignore
-echo .DS_Store >> .gitignore
-echo Thumbs.db >> .gitignore
-echo. >> .gitignore
-echo # Logs >> .gitignore
-echo *.log >> .gitignore
-echo npm-debug.log* >> .gitignore
-echo. >> .gitignore
-echo # Package lock files >> .gitignore
-echo package-lock.json >> .gitignore
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/target/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.swc/
+
+# Production
+build/
+dist/
+
+# Misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+
+# Maven
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# Spring Boot
+backend/HELP.md
+backend/.gradle/
+backend/build/
+backend/out/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
