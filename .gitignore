@@ -1,0 +1,29 @@
+echo # Dependencies > .gitignore
+echo node_modules/ >> .gitignore
+echo. >> .gitignore
+echo # Build outputs >> .gitignore
+echo frontend/.next/ >> .gitignore
+echo frontend/out/ >> .gitignore
+echo frontend/build/ >> .gitignore
+echo backend/target/ >> .gitignore
+echo. >> .gitignore
+echo # Environment variables >> .gitignore
+echo .env >> .gitignore
+echo .env.local >> .gitignore
+echo .env*.local >> .gitignore
+echo. >> .gitignore
+echo # IDE >> .gitignore
+echo .vscode/ >> .gitignore
+echo .idea/ >> .gitignore
+echo *.iml >> .gitignore
+echo. >> .gitignore
+echo # OS >> .gitignore
+echo .DS_Store >> .gitignore
+echo Thumbs.db >> .gitignore
+echo. >> .gitignore
+echo # Logs >> .gitignore
+echo *.log >> .gitignore
+echo npm-debug.log* >> .gitignore
+echo. >> .gitignore
+echo # Package lock files >> .gitignore
+echo package-lock.json >> .gitignore
