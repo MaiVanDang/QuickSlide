@@ -45,7 +45,7 @@ export default function RegisterPage() {
       }));
 
       // Redirect to dashboard
-      router.push('/dashboard');
+      router.push('/login');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -184,7 +184,7 @@ export default function RegisterPage() {
               </div>
             </div>
           </form>
-          <div className='info-box'>
+          <div className='info-box' style={{ backgroundImage: "url('/background.png')" }}>
 
           </div>
         </div>

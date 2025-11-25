@@ -57,7 +57,7 @@ export default function LoginPage() {
           </h2>
         </div>
         <div className='content-box'>
-          <div className='info-box'>
+          <div className='info-box' style={{ backgroundImage: "url('/background.png')" }}>
 
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 </div>
               )}
             </div>
-            <div className='info-box'>
+            <div className='info-box' >
               <div className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 label-box">
