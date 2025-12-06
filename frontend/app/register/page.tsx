@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { authAPI } from '../../lib/api';
 import Link from 'next/link';
-import './layout.css';
 
 interface RegisterForm {
   username: string;
