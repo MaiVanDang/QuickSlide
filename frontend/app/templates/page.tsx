@@ -53,7 +53,7 @@ const mockTemplates = [
     category: "Productivity",
     tags: ["meeting", "notes", "productivity"],
     createdAt: "2024-11-20",
-    thumbnail: "https://via.placeholder.com/400x250/8B5CF6/ffffff?text=Meeting",
+    thumbnail: "https://th.bing.com/th/id/OIP.HoecftGfUQvJ5jOE3owEfAHaKe?w=188&h=266&c=7&r=0&o=7&dpr=2.8&pid=1.7&rm=3",
     downloads: 1560
   },
   {
