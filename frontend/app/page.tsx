@@ -7,8 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Sửa đường dẫn từ '/login' thành '/placeholders'
-    router.push('/placeholders');
+    router.push('/login');
   }, [router]);
 
   return (
