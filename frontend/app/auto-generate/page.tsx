@@ -35,47 +35,47 @@ export default function Page() {
       </div>
       <form onSubmit={handleSubmit}>
         <div className="min-w-fit max-w-full min-h-[600px] max-h-fit">
-          <div className={`min-w-fit max-w-full min-h-[${inputHeight}px] max-h-fit flex flex-row justify-center`}>
-            <div className={`w-[${labelWidth}px] min-h-[${inputHeight}px] max-h-fit text-2xl flex justify-center items-center`}>
+          <div className="min-w-fit max-w-full min-h-[60px] max-h-fit flex flex-row justify-center">
+            <div className="w-[200px] min-h-[60px] max-h-fit text-2xl flex justify-center items-center">
               科目名
             </div>
-            <div className={`min-w-[${inputWidth}px] max-w-full min-h-[${inputHeight}px] max-h-fit flex items-center`}>
+            <div className="min-w-[800px] max-w-full min-h-[60px] max-h-fit flex items-center">
               <input
                 className="display: block w-full h-[40px] border border-gray-400 rounded-lg shadow-md px-4" name="name"
                 placeholder="スライドの内容に対応する件名を入力してください" value={name} onChange={(e) => setName(e.target.value)}></input>
             </div>
           </div>
-          <div className={`min-w-fit max-w-full min-h-[${inputHeight}px] max-h-fit flex flex-row justify-center`}>
-            <div className={`w-[${labelWidth}px] min-h-[${inputHeight}px] max-h-fit text-2xl flex justify-center items-center`}>
+          <div className="min-w-fit max-w-full min-h-[60px] max-h-fit flex flex-row justify-center">
+            <div className="w-[200px] min-h-[60px] max-h-fit text-2xl flex justify-center items-center">
               授業
             </div>
-            <div className={`min-w-[${inputWidth}px] max-w-full min-h-[${inputHeight}px] max-h-fit flex items-center`}>
+            <div className="min-w-[800px] max-w-full min-h-[60px] max-h-fit flex items-center">
               <input
                 className="display: block w-full h-[40px] border border-gray-400 rounded-lg shadow-md px-4" name="subject"
                 placeholder="名前またはレッスン数を入力してください" value={subject} onChange={(e) => setSubject(e.target.value)}></input>
             </div>
           </div>
-          <div className={`min-w-fit max-w-full min-h-[${inputHeight}px] max-h-fit flex flex-row justify-center`}>
-            <div className={`w-[${labelWidth}px] min-h-[${inputHeight}px] max-h-fit text-2xl flex justify-center items-center`}>
+          <div className="min-w-fit max-w-full min-h-[60px] max-h-fit flex flex-row justify-center">
+            <div className="w-[200px] min-h-[60px] max-h-fit text-2xl flex justify-center items-center">
               タイトル
             </div>
-            <div className={`min-w-[${inputWidth}px] max-w-full min-h-[${inputHeight}px] max-h-fit flex items-center`}>
+            <div className="min-w-[800px] max-w-full min-h-[60px] max-h-fit flex items-center">
               <input
                 className="display: block w-full h-[40px] border border-gray-400 rounded-lg shadow-md px-4" name="title"
                 placeholder="スライドのタイトルを入力してください" value={title} onChange={(e) => setTitle(e.target.value)}></input>
             </div>
           </div>
-          <div className={`min-w-fit max-w-full min-h-[${inputHeight2}px] max-h-fit flex flex-row justify-center`}>
-            <div className={`w-[${labelWidth}px] min-h-[${inputHeight}px] max-h-fit text-2xl flex justify-center items-center`}>
+          <div className="min-w-fit max-w-full min-h-[350px] max-h-fit flex flex-row justify-center">
+            <div className="w-[200px] min-h-[60px] max-h-fit text-2xl flex justify-center items-center">
               内容
             </div>
-            <div className={`min-w-[${inputWidth}px] max-w-full min-h-[350px] max-h-fit flex items-center`}>
+            <div className="min-w-[800px] max-w-full min-h-[350px] max-h-fit flex items-center">
               <textarea
                 className="display: block w-full h-[320px] border border-gray-400 rounded-lg shadow-md px-4" name="content"
                 placeholder="スライドに表示されるメインコンテンツを入力します" value={content} onChange={(e) => setContent(e.target.value)}></textarea>
             </div>
           </div>
-          <div className={`min-w-fit max-w-full min-h-[${inputHeight}px] max-h-fit flex flex-row justify-center items-center justify-self-center content-between gap-40`}>
+          <div className="min-w-fit max-w-full min-h-[60px] max-h-fit flex flex-row justify-center items-center justify-self-center content-between gap-40">
             <button
               className="w-[150px] h-[50px] bg-blue-500 hover:bg-blue-700 rounded-lg px-4"
               type="submit">作成 </button>
