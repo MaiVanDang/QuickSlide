@@ -30,20 +30,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Kích hoạt CORS
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Cho phép đăng nhập/đăng ký
-                .requestMatchers("/api/placeholders/**").permitAll() // 👇 MỞ CỬA CHO EDITOR
-                .requestMatchers("/api/slides/**").permitAll() // 👇 MỞ CỬA CHO SLIDE
-                .anyRequest().authenticated() // Các cái khác thì cần login
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+      http
+        // 1. Tắt CSRF
+        .csrf(AbstractHttpConfigurer::disable)
+
+        // 2. Cấu hình CORS
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+        // 3. Phân quyền (Mở cửa cho API auth và placeholders)
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()        // Đăng nhập/Đăng ký không cần token
+            .requestMatchers("/api/placeholders/**").permitAll() // <--- DÒNG QUAN TRỌNG: Mở public để test Editor
+            .anyRequest().authenticated()                       // Các API khác bắt buộc phải đăng nhập
+        );
 
         return http.build();
     }
