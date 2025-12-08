@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import api from "../../lib/api"
 
 export default function Page() {
   const [name, setName] = useState("");
@@ -18,7 +19,28 @@ export default function Page() {
     //cái này để kiểm tra JSON có lưu đúng dữ liệu không, xóa đi sau khi viết thêm đoạn gửi API
     console.log(data);     // JSON
     localStorage.setItem("inputData", JSON.stringify(data));
+    //Load template
+    loadTemplate(String(data.name));
     // Chuyển hướng
+    router.push('/placeholders');
+  }
+  const loadTemplate = async (name) => {
+    try {
+      const response = await api.get(`/load/template/${name}`);
+      localStorage.setItem("template", response.data);
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 404) {
+          alert("Template not found");
+        } else {
+          alert("Server error: " + err.response.status);
+        }
+      } else {
+        alert("Network error");
+      }
+    }
+  };
+  const handleReset = () => {
     router.push('/placeholders');
   }
   return (
@@ -31,7 +53,7 @@ export default function Page() {
           クイックスライド作成
         </h1>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onReset={handleReset}>
         <div className="min-w-fit max-w-full min-h-[600px] max-h-fit">
           <div className="min-w-fit max-w-full min-h-[60px] max-h-fit flex flex-row justify-center">
             <div className="w-[200px] min-h-[60px] max-h-fit text-2xl flex justify-center items-center">
