@@ -32,18 +32,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Kích hoạt CORS
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Cho phép đăng nhập/đăng ký
-                .requestMatchers("/api/placeholders/**").permitAll() // 👇 MỞ CỬA CHO EDITOR
-                .requestMatchers("/api/slides/**").permitAll() // 👇 MỞ CỬA CHO SLIDE
-                .anyRequest().authenticated() // Các cái khác thì cần login
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Kích hoạt CORS
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll() // Cho phép đăng nhập/đăng ký
+                        .requestMatchers("/placeholders/**").permitAll() // 👇 MỞ CỬA CHO EDITOR
+                        .requestMatchers("/slides/**").permitAll() // 👇 MỞ CỬA CHO SLIDE
+                        .anyRequest().authenticated() // Các cái khác thì cần login
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -52,7 +51,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // 👇 Cho phép đích danh Frontend của bạn (Sửa cứng thế này cho chắc)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); 
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

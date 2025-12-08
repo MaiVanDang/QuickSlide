@@ -1,18 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const router = useRouter();
 
-  const headingSize: [number, number] = [120, 70]
-  const inputHeight = 60
-  const inputHeight2 = 350
-  const labelWidth = 200
-  const inputWidth = 800
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -20,13 +17,14 @@ export default function Page() {
     const data = Object.fromEntries(formData.entries());
     //cái này để kiểm tra JSON có lưu đúng dữ liệu không, xóa đi sau khi viết thêm đoạn gửi API
     console.log(data);     // JSON
-    alert(JSON.stringify(data, null, 2));
-    //data là input người dùng dưới dạng JSON
+    localStorage.setItem("inputData", JSON.stringify(data));
+    // Chuyển hướng
+    router.push('/placeholders');
   }
   return (
     <div className="p-6">
       <div className="min-h-[75px] max-h-fit w-full border-b-4 border-gray-900">
-        <div className={`absolute  text-center font-bold text-3xl w-[${headingSize[0]}px] h-[${headingSize[1]}px]`}>
+        <div className="absolute  text-center font-bold text-3xl w-[120px] h-[70px]">
           Quick Slide
         </div>
         <h1 className="font-bold text-4xl text-center">
