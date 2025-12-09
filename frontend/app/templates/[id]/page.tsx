@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-// IMPORTS
 import { AuthStore } from '@/lib/store/AuthStore';
 import { templateAPI } from '@/lib/api';
 import SlideCanvas, { SlideCanvasRef } from "@/components/SlideCanvas";
@@ -24,22 +23,22 @@ export default function TemplateEditorPage() {
     const templateId = Array.isArray(params.id) ? params.id[0] : params.id;
     const copyFromId = searchParams.get("copyFrom");
 
-    // Protect route 
+ 
     const { isLoggedIn } = AuthStore.getState();
     if (typeof window !== "undefined" && !isLoggedIn) {
         window.location.replace("/login");
         return null;
     }
 
-    const [templateName, setTemplateName] = useState(""); // ② Tên slide/Template
+    const [templateName, setTemplateName] = useState(""); 
     const [templateDescription, setTemplateDescription] = useState("");
     const [initialContent, setInitialContent] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false); // ⑧ Trạng thái Lưu
+    const [isSaving, setIsSaving] = useState(false); 
     const [error, setError] = useState<string | null>(null);
     const [isMaximized, setIsMaximized] = useState(false);
 
-    // Ref để gọi hàm getContent() từ SlideCanvas
+
     const canvasRef = useRef<SlideCanvasRef>(null);
 
     // LOAD DATA
@@ -74,8 +73,8 @@ export default function TemplateEditorPage() {
         fetchTemplate();
     }, [templateId, copyFromId, router]);
 
-    // SAVE
-    const handleSave = async () => { // ⑧ Nút Lưu
+
+    const handleSave = async () => { 
         if (!templateName.trim()) {
             alert("Tên template không được để trống!");
             return;
@@ -111,14 +110,14 @@ export default function TemplateEditorPage() {
         }
     };
 
-    // DELETE TEMPLATE
-    const handleDelete = async () => { // ⑧ Nút Hủy (giả định Xóa template hiện tại, nếu muốn Cancel thì dùng nút Back)
+
+    const handleDelete = async () => { 
         if (templateId === "new") return;
         if (window.confirm(`Bạn có chắc muốn xóa template "${templateName}"?`)) {
             try {
                 await templateAPI.deleteTemplate(templateId);
                 alert("Template đã được xóa.");
-                router.push("/store"); // Quay lại trang thư viện mới
+                router.push("/store"); 
             } catch (err: any) {
                 setError(err.response?.data?.message || "Bạn không có quyền xóa.");
             }
@@ -148,7 +147,7 @@ export default function TemplateEditorPage() {
                             <ChevronLeft className="size-5" />
                         </Button>
                     </Link>
-                    {/* ① Logo có thể được chèn tại đây nếu không dùng nút Back */}
+                    {/*Logo chèn thêm*/}
                     <Input
                         type="text"
                         value={templateName}
@@ -178,7 +177,7 @@ export default function TemplateEditorPage() {
                         </Button>
                     )}
                     <Button
-                        onClick={handleSave} // ⑧ Nút Lưu
+                        onClick={handleSave} 
                         disabled={isSaving || !templateName.trim()}
                         className="bg-green-600 hover:bg-green-700 px-4 py-2 text-sm flex items-center gap-1 text-white"
                     >

@@ -18,5 +18,5 @@ public class Theme {
     private String primaryColor;
     private String secondaryColor;
     private String fontFamily;
-    private boolean isDefault = false; // Mẫu theme mặc định
+    private boolean isDefault = false; 
 }

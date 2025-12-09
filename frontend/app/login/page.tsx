@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { authAPI } from '../../lib/api';
 import Link from 'next/link';
-// import './layout.css';  <-- BỎ DÒNG NÀY ĐI để tránh lỗi vỡ khung
+
 
 interface LoginForm {
   email: string;
@@ -37,7 +37,7 @@ export default function LoginPage() {
         email: response.email,
       }));
 
-      // Chuyển hướng
+      
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'ログインに失敗しました。');

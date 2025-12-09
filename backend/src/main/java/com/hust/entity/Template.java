@@ -42,7 +42,6 @@ public class Template {
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic = false; 
     
-    // Constructor cho việc tạo mới
     public Template(String name, String description, String templateContent, User user, Boolean isPublic) {
         this.name = name;
         this.description = description;

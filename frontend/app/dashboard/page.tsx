@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx
+
 'use client';
 
 import Link from 'next/link';
@@ -9,14 +9,14 @@ import { templateAPI } from '@/lib/api'; // Giả định sử dụng api.ts
 interface RecentItem {
     id: number;
     name: string;
-    authorUsername: string;
+    username: string;
     updatedAt: string;
     isPublic: boolean;
 }
 
-const RecentTemplateCard = ({ id, name, authorUsername, updatedAt }: RecentItem) => {
+const RecentTemplateCard = ({ id, name, username, updatedAt }: RecentItem) => {
     const formattedDate = new Date(updatedAt).toLocaleDateString('vi-VN');
-    const linkHref = `/templates/${id}`; // ✅ ĐÚNG: Link dẫn đến màn hình chỉnh sửa
+    const linkHref = `/templates/${id}`; 
 
     return (
         <Link href={linkHref} className="block p-4 bg-white border rounded-xl hover:shadow-lg transition duration-200">
@@ -25,7 +25,7 @@ const RecentTemplateCard = ({ id, name, authorUsername, updatedAt }: RecentItem)
                 <span className="font-semibold truncate text-base">{name}</span>
             </div>
             <div className="text-sm text-gray-500 space-y-1">
-                <p>Tác giả: {authorUsername}</p>
+                <p>Tác giả: {username}</p>
                 <p>Chỉnh sửa: {formattedDate}</p>
             </div>
         </Link>
@@ -38,30 +38,30 @@ const [recentTemplates, setRecentTemplates] = useState<RecentItem[]>([]);
 
     useEffect(() => {
         const fetchRecent = async () => {
-            setLoading(true); // ✅ Đảm bảo loading được đặt lại
+            setLoading(true); 
             try {
-                // ✅ KÍCH HOẠT: Gọi API GET /api/templates/recent
+                
                 const recent = await templateAPI.getRecentTemplates();
                 setRecentTemplates(recent);
             } catch (error) {
                 console.error("Failed to fetch recent templates:", error);
-                // Giả định: nếu API lỗi, set mảng rỗng
+               
                 setRecentTemplates([]); 
             } finally {
                 setLoading(false);
             }
         };
-        fetchRecent(); // ✅ Gọi hàm fetchRecent
+        fetchRecent(); 
     }, []);
 
     return (
         <div className="container mx-auto p-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-8">Chào mừng, {username}!</h2>
 
-            {/* 3 chức năng chính */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <Link href="/templates/new" className="block bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border-t-4 border-indigo-600">
-                    {/* ✅ ĐÚNG: Trỏ đến /templates/new */}
+                    {}
                     <Edit className="w-8 h-8 text-indigo-600 mb-3" />
                     <h3 className="text-xl font-semibold mb-2">Tạo & Chỉnh Sửa Template</h3>
                     <p className="text-gray-500">Thiết kế bố cục slide mẫu.</p>
@@ -80,7 +80,7 @@ const [recentTemplates, setRecentTemplates] = useState<RecentItem[]>([]);
                 </Link>
             </div>
 
-            {/* Lịch sử gần đây */}
+            {}
             <div className="mt-12">
                 <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                     <Clock className="w-6 h-6 mr-2 text-gray-600" /> Hoạt động gần đây

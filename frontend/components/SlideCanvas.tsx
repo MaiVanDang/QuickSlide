@@ -1,4 +1,3 @@
-// components/SlideCanvas.tsx
 'use client';
 
 import React, { 
@@ -66,7 +65,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
 
         const [placeholders, setPlaceholders] = useState<Placeholder[]>(initialPlaceholders);
 
-        // --- STATE QUẢN LÝ TƯƠNG TÁC (Đã sửa lỗi ReferenceError) ---
+        // --- STATE QUẢN LÝ TƯƠNG TÁC  ---
         const [selectedIds, setSelectedIds] = useState<number[]>([]); 
         const [editingId, setEditingId] = useState<number | null>(null); 
         const [preview, setPreview] = useState(false); 
@@ -100,7 +99,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
             },
         }));
 
-        // --- CORE FUNCTIONS (Đã được sửa lỗi) ---
+
 
         const snapToGrid = (x: number, y: number) => ({
             x: Math.round(x / GRID_SIZE) * GRID_SIZE,
@@ -108,7 +107,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
         });
 
         const addPlaceholder = (type: string) => {
-             // ... (logic thêm placeholder)
+
             const newPh: Placeholder = {
                 id: Date.now(),
                 type,
@@ -308,17 +307,15 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
             window.addEventListener("keydown", handleKeyDown);
             return () => window.removeEventListener("keydown", handleKeyDown);
         }, [selectedIds, editingId, placeholders]);
-
-
-        // --- RENDER UI (Bố cục 3 cột theo thiết kế) ---
         
-        // Xác định placeholder đang được chỉnh sửa thuộc tính (dùng cho Panel ⑦)
+        // --- RENDER----
+
         const editingPlaceholder = placeholders.find(ph => ph.id === editingId);
         
         return (
             <div className="flex gap-4 p-4 h-full bg-gray-50 w-full">
                 
-                {/* CỘT 1: Panel Elements & Cài đặt ( Bảng cài đặt) */}
+                {/* CỘT 1: Panel Elements & Cài đặt  */}
                 <div className="w-64 p-4 space-y-4 bg-white border border-gray-300 rounded-lg shadow-sm overflow-y-auto shrink-0">
                     
                     {/* Bảng Elements (Thêm Placeholder) */}
@@ -335,7 +332,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
                         ))}
                     </div>
                     
-                    {/* Khu vực Cài đặt (⑥ 設定パネル) */}
+                    {/* Khu vực Cài đặt */}
                     <div className="mt-6 pt-6 border-t space-y-2">
                         <h3 className="text-sm font-semibold pt-2"> Bảng Cài đặt</h3>
                         <button
@@ -365,7 +362,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
                     )}
                 </div>
 
-                {/* CỘT 2: Canvas (③ Tiêu đề, ④ Nội dung & ⑤ Định dạng) */}
+                {/* CỘT 2: Canvas */}
                 <div className="flex-1 flex flex-col items-center relative space-y-4">
                     
                     {/* Thanh Định dạng (⑤ B / I / U / □) */}
@@ -381,7 +378,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
 
                     {/* Canvas chính */}
                     <div className="p-4 bg-white border border-gray-300 rounded-lg shadow-sm flex-1 flex flex-col items-center justify-center relative">
-                        {/* Khu vực Tên Slide (② スライド名) - Giả lập cho mục đích hiển thị */}
+                        {/* Khu vực Tên Slide -Giả lập cho mục đích hiển thị */}
                         <h3 className="text-md text-gray-500 mb-2">Slide Tên: Slide 2 (Demo)</h3>
 
                         <div
@@ -396,7 +393,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
                             }}
                             onMouseDown={handleCanvasMouseDown}
                         >
-                            {/* Render Placeholders (③ Tiêu đề & ④ Nội dung) */}
+                            {/* Render Placeholders */}
                             {placeholders.map((ph) => {
                                 const isSelected = selectedIds.includes(ph.id);
                                 
@@ -438,7 +435,7 @@ const SlideCanvas = forwardRef<SlideCanvasRef, SlideCanvasProps>(
                     </div>
                 </div>
 
-                {/* CỘT 3: Panel Properties (⑦ プロパティ設定) */}
+                {/* CỘT 3: Panel Properties */}
                 <div className="w-64 p-4 bg-white border border-gray-300 rounded-lg shadow-sm overflow-y-auto shrink-0">
                     <h2 className="text-lg font-bold mb-4"> Thiết lập thuộc tính (Properties)</h2>
                     {editingPlaceholder ? (

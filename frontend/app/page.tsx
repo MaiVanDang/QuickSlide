@@ -7,12 +7,10 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Không kiểm tra token gì cả
-    // Cứ vào trang chủ là chuyển hướng ngay sang Login
     router.push('/login');
   }, [router]);
 
-  // Giao diện chờ trong lúc đang chuyển hướng
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">

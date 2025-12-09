@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.hust.entity.Template;
 import java.util.List;
 
 @RestController
@@ -56,7 +56,19 @@ public class TemplateController {
                     .body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
         }
     }
-
+@PostMapping("/copy/{id}")
+    public ResponseEntity<?> createTemplateFromCopy(@PathVariable Integer id) {
+        try {
+            Template newTemplate = templateService.createTemplateFromCopy(id);
+            // Trả về đối tượng Template mới (bản sao) để Frontend chuyển hướng đến trang chỉnh sửa bản sao đó.
+            return ResponseEntity.status(HttpStatus.CREATED).body(newTemplate);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Template nguồn không tồn tại")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        }
+    }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTemplate(@PathVariable Integer id, @Valid @RequestBody UpdateTemplateRequest request) {
         try {

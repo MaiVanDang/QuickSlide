@@ -15,10 +15,10 @@ export default function Page() {
     const formData = new FormData(e.target);
 
     const data = Object.fromEntries(formData.entries());
-    //cái này để kiểm tra JSON có lưu đúng dữ liệu không, xóa đi sau khi viết thêm đoạn gửi API
-    console.log(data);     // JSON
+  
+    console.log(data);     
     localStorage.setItem("inputData", JSON.stringify(data));
-    // Chuyển hướng
+    
     router.push('/placeholders');
   }
   return (

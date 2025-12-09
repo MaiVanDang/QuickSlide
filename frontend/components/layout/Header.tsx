@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function Header() {
-  // Logic hiển thị username, logout (nếu có)
+
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">

@@ -1,5 +1,4 @@
-// File này thường chứa các hàm helper để quản lý token và trạng thái đăng nhập
-// Ví dụ:
+
 
 export const getToken = (): string | null => {
     // Trả về token từ localStorage
@@ -10,16 +9,15 @@ export const getToken = (): string | null => {
 };
 
 export const isAuthenticated = (): boolean => {
-    // Kiểm tra xem token có tồn tại hay không (kiểm tra token hết hạn phức tạp hơn)
+    // Kiểm tra xem token có tồn tại hay không 
     const token = getToken();
     return !!token;
 };
 
 export const logout = () => {
-    // Xóa token và chuyển hướng
+ 
     if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
-        // Sau khi logout, nên chuyển hướng đến trang đăng nhập
         window.location.href = '/login'; 
     }
 };
