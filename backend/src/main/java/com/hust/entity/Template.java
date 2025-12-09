@@ -15,6 +15,4 @@ public class Template {
     private Theme theme;
     @Column(name = "template_name")
     private String name;
-    @Column(name = "default_content")
-    private String content;
 }

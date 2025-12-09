@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll() // Cho phép đăng nhập/đăng ký
                         .requestMatchers("/placeholders/**").permitAll() // 👇 MỞ CỬA CHO EDITOR
                         .requestMatchers("/slides/**").permitAll() // 👇 MỞ CỬA CHO SLIDE
-                        .anyRequest().authenticated() // Các cái khác thì cần login
+                        .anyRequest().permitAll() // Các cái khác thì cần login
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

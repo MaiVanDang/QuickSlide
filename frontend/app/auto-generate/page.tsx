@@ -21,6 +21,7 @@ export default function Page() {
     localStorage.setItem("inputData", JSON.stringify(data));
     //Load template
     loadTemplate(String(data.name));
+    loadPlaceholder(String(data.title));
     // Chuyển hướng
     router.push('/placeholders');
   }
@@ -33,13 +34,29 @@ export default function Page() {
         if (err.response.status === 404) {
           alert("Template not found");
         } else {
-          alert("Server error: " + err.response.status);
+          alert("Server error at load template: " + err.response.status);
         }
       } else {
         alert("Network error");
       }
     }
   };
+  const loadPlaceholder = async (title) => {
+    try {
+      const response = await api.get(`/placeload/holder/${title}`);
+      localStorage.setItem("placeholder", `${response.data}`);
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 404) {
+          alert("Place holder not found");
+        } else {
+          alert("Server error at load placeholder: " + err.response.status);
+        }
+      } else {
+        alert("Network error");
+      }
+    }
+  }
   const handleReset = () => {
     router.push('/placeholders');
   }
