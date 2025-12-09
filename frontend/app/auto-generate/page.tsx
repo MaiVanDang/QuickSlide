@@ -11,17 +11,27 @@ export default function Page() {
   const [content, setContent] = useState("");
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
 
     const data = Object.fromEntries(formData.entries());
-    //cái này để kiểm tra JSON có lưu đúng dữ liệu không, xóa đi sau khi viết thêm đoạn gửi API
-    console.log(data);     // JSON
     localStorage.setItem("inputData", JSON.stringify(data));
-    //Load template
-    loadTemplate(String(data.name));
-    loadPlaceholder(String(data.title));
+    //Load template, bỏ qua nếu đã có trong localStorage
+    if (localStorage.getItem("template") == null) {
+      await loadTemplate(String(data.name)); //Hiện load theo name, có thể chỉnh load theo trường khác
+    }
+    //Load placeHolder, bỏ qua nếu đã có trong localStorage
+    if (localStorage.getItem("placeholder") == null) {
+      await loadPlaceholder(String(data.title)); //Hiện load theo title, có thể chỉnh load theo trường khác
+    }
+
+    //Tạo JSON placeholder rỗng nếu không load được trong db
+    if (localStorage.getItem("placeholder") == null) {
+      localStorage.setItem("placeholder", JSON.stringify({}));
+    }
+    //Xử lý chèn dữ liệu vào Placeholder
+    insertData();
     // Chuyển hướng
     router.push('/placeholders');
   }
@@ -32,7 +42,7 @@ export default function Page() {
     } catch (err) {
       if (err.response) {
         if (err.response.status === 404) {
-          alert("Template not found");
+          console.log("Template not found");
         } else {
           alert("Server error at load template: " + err.response.status);
         }
@@ -43,18 +53,63 @@ export default function Page() {
   };
   const loadPlaceholder = async (title) => {
     try {
-      const response = await api.get(`/placeload/holder/${title}`);
-      localStorage.setItem("placeholder", `${response.data}`);
+      const response = await api.get(`/load/placeholder/${title}`);
+      localStorage.setItem("placeholder", JSON.stringify(response.data, null, 2));
     } catch (err) {
       if (err.response) {
         if (err.response.status === 404) {
-          alert("Place holder not found");
+          console.log("Place holder not found");
         } else {
           alert("Server error at load placeholder: " + err.response.status);
         }
       } else {
         alert("Network error");
       }
+    }
+  }
+  const insertData = () => {
+    const input = JSON.parse(localStorage.getItem("inputData"));
+    const placeholders = JSON.parse(localStorage.getItem("placeholder"));
+    let i = 1;
+    //Nếu không đủ placeholder, tạo placeholder mới
+    //Chèn name
+    if (input.name) {
+      insertToPlaceHolder(placeholders, i, input.name);
+      i += 1;
+    }
+    //Chèn subject
+    if (input.subject) {
+      insertToPlaceHolder(placeholders, i, input.subject);
+      i += 1;
+    }
+    //Chèn title
+    if (input.title) {
+      insertToPlaceHolder(placeholders, i, input.title);
+      i += 1;
+    }
+    //Chèn content (mỗi câu 1 placeholder)
+    if (input.content) {
+      const sentences = input.content.split(/\./);
+      for (let sentence in sentences) {
+        insertToPlaceHolder(placeholders, i, sentences[sentence]);
+        i += 1;
+      }
+    }
+    localStorage.setItem("placeholder", JSON.stringify(placeholders));
+  }
+  const insertToPlaceHolder = (placeholders, i, data) => {
+    if (!placeholders[i]) {
+      makeNewPlaceHolder(placeholders, i);
+    }
+    placeholders[i].data = data;
+  }
+  const makeNewPlaceHolder = (placeholders, i) => {
+    placeholders[i] = {
+      x: 0,
+      y: 0,
+      height: 100,
+      width: 200,
+      zIndex: 1
     }
   }
   const handleReset = () => {

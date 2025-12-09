@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "slides")
 @Data
+@JsonIgnoreProperties({ "presentation" })
 public class Slide {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -8,7 +8,7 @@ import lombok.Data;
 @Entity
 @Table(name = "placeholders")
 @Data
-@JsonIgnoreProperties({ "presentation" })
+@JsonIgnoreProperties({ "slide" })
 public class Placeholder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
