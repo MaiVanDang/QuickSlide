@@ -16,6 +16,7 @@ pids
 *.lock
 backend/target/
 *.log
+*.jar
 # --- BẢO MẬT & MÔI TRƯỜNG  ---
 .env
 .env.local
