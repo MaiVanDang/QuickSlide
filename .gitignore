@@ -1,0 +1,44 @@
+# --- FRONTEND  ---
+node_modules/
+frontend/node_modules/
+.next/
+out/
+build/
+dist/
+
+# --- BACKEND  ---
+backend/node_modules/
+*.log
+logs/
+pids
+*.pid
+*.seed
+*.lock
+backend/target/
+*.log
+*.jar
+# --- BẢO MẬT & MÔI TRƯỜNG  ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+/frontend/.env.local
+/backend/.env
+
+# --- DATABASE  ---
+*.db
+*.sqlite
+/data/
+/mongodb/
+
+# --- TYPESCRIPT & CẤU HÌNH IDE ---
+*.tsbuildinfo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- FILE TẢI LÊN  ---
+public/uploads/
+backend/storage/
