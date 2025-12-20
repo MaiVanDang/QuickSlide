@@ -1,10 +1,14 @@
 package com.hust.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Table(name = "placeholders")
 @Data
+@JsonIgnoreProperties({ "slide" })
 public class Placeholder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +24,7 @@ public class Placeholder {
     private Double width;
     private Double height;
     private Integer zIndex;
-    
+
     @Column(columnDefinition = "TEXT")
     private String properties; // JSON string
 }
