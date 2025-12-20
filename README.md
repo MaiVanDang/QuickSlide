@@ -1,0 +1,1 @@
+Tạo file .env.local dựa trên .env.example để dự án hoạt động chính xác

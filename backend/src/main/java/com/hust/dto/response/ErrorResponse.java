@@ -1,20 +1,21 @@
 package com.hust.dto.response;
 
+import java.time.Instant;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ErrorResponse {
-    private String message;
-    private int status;
-    private long timestamp;
 
-    public ErrorResponse(String message, int status) {
-        this.message = message;
-        this.status = status;
-        this.timestamp = System.currentTimeMillis();
-    }
+    private int status;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Instant timestamp;
+    private String message;
+    private String details;
 }
