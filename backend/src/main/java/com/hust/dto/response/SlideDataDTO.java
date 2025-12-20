@@ -17,26 +17,31 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SlideDataDTO {
-    private String name;    // Tên Slide từ cột title (cột A)
-    private String content; // Nội dung từ cột description (cột B)
+
+    // Cột A: title (tên bài thuyết trình)
+    private String name;
+
+    // Cột B: slide_title (tiêu đề slide)
+    private String slideTitle;
+
+    // Cột C: slide_content (nội dung slide)
+    private String content;
 
     @JsonProperty("isError")
     @JsonAlias({"error"})
     private boolean error;
 
     private String errorMessage;
-    
-    // Lưu trữ các cột động (value, price, category, v.v.)
+
+    // Các cột khác (nếu có)
     @Builder.Default
     private Map<String, Object> additionalData = new HashMap<>();
-    
-    // Serialize các field động ra JSON
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalData() {
         return additionalData;
     }
-    
-    // Deserialize các field động từ JSON
+
     @JsonAnySetter
     public void setAdditionalProperty(String key, Object value) {
         this.additionalData.put(key, value);

@@ -29,9 +29,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +68,7 @@ public class BatchService {
     @Autowired private TemplateRepository templateRepository;
     @Autowired private TemplateSlideRepository templateSlideRepository;
     @Autowired private ObjectMapper objectMapper;
+    // @Autowired private HistoryLogService historyLogService;
 
     // --- 1. Xử lý Upload và Preview (POST /api/batch/upload) ---
     public List<SlideDataDTO> parseFile(MultipartFile file, Long currentUserId) {
@@ -88,95 +87,60 @@ public class BatchService {
         
         try (InputStream inputStream = file.getInputStream()) {
             Workbook workbook = WorkbookFactory.create(inputStream);
+            DataFormatter formatter = new DataFormatter();
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             Sheet sheet = workbook.getSheetAt(0);
             
-            // Đọc header row (row 0)
-            Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                throw new RuntimeException("File Excel trống hoặc không có header");
-            }
-            
-            // Lấy danh sách tên cột từ header
-            List<String> columnNames = new ArrayList<>();
-            int maxColumns = headerRow.getLastCellNum();
-            
-            for (int i = 0; i < maxColumns; i++) {
-                Cell cell = headerRow.getCell(i);
-                String columnName = getCellValueAsString(cell);
-                columnNames.add(columnName.isEmpty() ? "Column" + i : columnName);
-            }
-            
-            // Đọc các dòng dữ liệu (bắt đầu từ row 1)
-            for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
+            // Bỏ qua hàng tiêu đề (hàng 0)
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
                 if (row == null) continue;
-                
-                // Kiểm tra xem dòng có trống không
-                if (isRowEmpty(row)) continue;
-                
-                // Khởi tạo data
-                Map<String, Object> additionalData = new HashMap<>();
-                String name = null;
-                String content = null;
-                
-                // Đọc tất cả các cột
-                for (int colIndex = 0; colIndex < columnNames.size(); colIndex++) {
-                    Cell cell = row.getCell(colIndex);
-                    String columnName = columnNames.get(colIndex);
-                    Object cellValue = getCellValue(cell);
-                    
-                    // Map các cột chuẩn (title, description)
-                    if (columnName.equalsIgnoreCase("title")) {
-                        name = cellValue != null ? cellValue.toString() : "";
-                    } else if (columnName.equalsIgnoreCase("description")) {
-                        String contentRaw = cellValue != null ? cellValue.toString() : "";
-                        
-                        // Nếu cột description là Google Docs link (public), tải về text
-                        if (!contentRaw.isBlank() && looksLikeUrl(contentRaw)) {
-                            try {
-                                String resolved = tryResolveGoogleDocsToText(contentRaw);
-                                if (resolved != null) {
-                                    content = resolved;
-                                } else {
-                                    content = contentRaw;
-                                }
-                            } catch (Exception e) {
-                                dataList.add(SlideDataDTO.builder()
-                                        .name(name)
-                                        .content(contentRaw)
-                                        .error(true)
-                                        .errorMessage("Không thể đọc nội dung từ link Google Docs (cần public hoặc đúng định dạng).")
-                                        .additionalData(additionalData)
-                                        .build());
-                                continue;
-                            }
-                        } else {
-                            content = contentRaw;
+
+                // Giả định: Cột 0 là Tên Slide, Cột 1 là Nội dung
+                String name = getCellValue(row.getCell(0), formatter, evaluator);
+                String contentRaw = getCellValue(row.getCell(1), formatter, evaluator);
+                String content = contentRaw;
+
+                // Nếu cột B là Google Docs link (public), tải về text để dùng làm content.
+                // Nếu không tải được (private/forbidden/invalid), đánh dấu error cho dòng này.
+                if (!contentRaw.isBlank() && looksLikeUrl(contentRaw)) {
+                    try {
+                        String resolved = tryResolveGoogleDocsToText(contentRaw);
+                        if (resolved != null) {
+                            content = resolved;
                         }
-                    } else {
-                        // Các cột khác lưu vào additionalData
-                        additionalData.put(columnName, cellValue);
+                    } catch (Exception e) {
+                        dataList.add(SlideDataDTO.builder()
+                                .name(name)
+                                .content(contentRaw)
+                                .error(true)
+                                .errorMessage("Không thể đọc nội dung từ link Google Docs (cần public hoặc đúng định dạng).")
+                                .build());
+                        continue;
                     }
                 }
+
+                boolean nameBlank = name.isBlank();
+                boolean contentBlank = content.isBlank();
+
+                // Skip fully empty rows (common when sheets contain formatting down to many rows)
+                if (nameBlank && contentBlank) {
+                    continue;
+                }
                 
-                boolean nameBlank = name == null || name.isBlank();
-                boolean contentBlank = content == null || content.isBlank();
-                
-                // Validation nghiệp vụ
+                // Validation nghiệp vụ: (Business Rule No. 5)
                 if (nameBlank || contentBlank) {
                     dataList.add(SlideDataDTO.builder()
-                            .name(name != null ? name : "")
-                            .content(content != null ? content : "")
+                            .name(name)
+                            .content(content)
                             .error(true)
                             .errorMessage("Tên Slide hoặc Nội dung không được trống.")
-                            .additionalData(additionalData)
                             .build());
                 } else {
                     dataList.add(SlideDataDTO.builder()
                             .name(name)
                             .content(content)
                             .error(false)
-                            .additionalData(additionalData)
                             .build());
                 }
             }
@@ -190,57 +154,6 @@ public class BatchService {
             throw new IllegalArgumentException("Tệp không chứa dữ liệu slide hợp lệ.");
         }
         return dataList;
-    }
-
-    // Helper methods
-    private boolean isRowEmpty(Row row) {
-        if (row == null) return true;
-        
-        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
-            Cell cell = row.getCell(i);
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                String value = getCellValueAsString(cell);
-                if (!value.trim().isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private Object getCellValue(Cell cell) {
-        if (cell == null) return null;
-        
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    return cell.getDateCellValue();
-                }
-                double numValue = cell.getNumericCellValue();
-                if (numValue == (long) numValue) {
-                    return (long) numValue;
-                }
-                return numValue;
-            case BOOLEAN:
-                return cell.getBooleanCellValue();
-            case FORMULA:
-                try {
-                    return cell.getNumericCellValue();
-                } catch (IllegalStateException e) {
-                    return cell.getStringCellValue();
-                }
-            case BLANK:
-                return null;
-            default:
-                return cell.toString();
-        }
-    }
-
-    private String getCellValueAsString(Cell cell) {
-        Object value = getCellValue(cell);
-        return value != null ? value.toString() : "";
     }
 
     private static final Pattern GOOGLE_DOC_ID = Pattern.compile("https?://docs\\.google\\.com/document/(?:u/\\d+/)?d/([a-zA-Z0-9_-]+)");
@@ -288,10 +201,16 @@ public class BatchService {
         }
 
         String text = new String(body, java.nio.charset.StandardCharsets.UTF_8);
+        // Normalize line endings
         return text.replace("\r\n", "\n").trim();
     }
     
     // --- 2. Tạo Slide Hàng Loạt (POST /api/batch/generate) ---
+    // Mỗi dòng Excel = 1 bài thuyết trình (presentation).
+    // Cột A: tên bài + môn học (có thể gộp chung trong 1 cell).
+    // Cột B: nội dung hoặc link Google Docs (public). Nội dung có thể chứa nhiều slide:
+    // - Tách slide bằng "---"
+    // - Mỗi slide block: dòng đầu là title, các dòng sau là body (structured: Ảnh -> Caption -> Text -> Date theo "\\--", slot theo "\\-")
     @Transactional
     public BatchGenerateResult createBatchSlides(BatchGenerateRequest request, Long currentUserId) {
         
@@ -306,6 +225,9 @@ public class BatchService {
             throw new IllegalArgumentException("Dữ liệu chứa lỗi và không thể tạo slide. Vui lòng sửa lại tệp.");
         }
         
+        // 1) Resolve layout strategy
+        // - Preferred: template deck (templateId) => apply per-slide layout from template slides, cap slide count to deck size.
+        // - Fallback: single template slide (templateSlideId) => repeat the same layout for all slides.
         final Long templateId = request.getTemplateId();
         final Long templateSlideId = request.getTemplateSlideId();
 
@@ -352,6 +274,7 @@ public class BatchService {
             if (templateDeckSlides != null) {
                 int maxSlides = templateDeckSlides.size();
                 if (slideBlocks.size() > maxSlides) {
+                    // Create only up to template slide count, but return a warning to the client.
                     warnings.add(
                             "Số lượng nội dung bạn gửi yêu cầu quá số lượng trang: "
                                     + slideBlocks.size()
@@ -415,6 +338,7 @@ public class BatchService {
         String s = raw == null ? "" : raw.trim();
         if (s.isBlank()) return new LessonMeta("", "");
 
+        // 1) Nếu người dùng xuống dòng trong cell: dòng 1=subject, dòng 2=lesson
         String normalized = s.replace("\r\n", "\n");
         if (normalized.contains("\n")) {
             String[] lines = normalized.split("\n");
@@ -431,6 +355,7 @@ public class BatchService {
             }
         }
 
+        // 2) Nếu dùng separator "|": "subject | lesson"
         if (s.contains("|")) {
             String[] parts = s.split("\\|", 2);
             String subject = parts.length > 0 ? parts[0].trim() : "";
@@ -438,6 +363,7 @@ public class BatchService {
             if (!subject.isBlank() || !lesson.isBlank()) return new LessonMeta(subject, lesson.isBlank() ? subject : lesson);
         }
 
+        // 3) Nếu dùng " - " : "subject - lesson"
         if (s.contains(" - ")) {
             String[] parts = s.split("\\s-\\s", 2);
             String subject = parts.length > 0 ? parts[0].trim() : "";
@@ -445,6 +371,7 @@ public class BatchService {
             if (!subject.isBlank() || !lesson.isBlank()) return new LessonMeta(subject, lesson.isBlank() ? subject : lesson);
         }
 
+        // Fallback: coi như lesson
         return new LessonMeta("", s);
     }
 
@@ -490,8 +417,21 @@ public class BatchService {
         }
         return new TitleAndBody(title, body.toString().trim());
     }
+
+    // --- Helper để lấy giá trị Cell (Tránh lỗi Null và định dạng) ---
+    private String getCellValue(Cell cell, DataFormatter formatter, FormulaEvaluator evaluator) {
+        if (cell == null) return "";
+        try {
+            String v = formatter.formatCellValue(cell, evaluator);
+            return v != null ? v.trim() : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
     
+    // --- Helper Mockup: Chèn dữ liệu vào Template Layout JSON ---
     private String generateContentJsonFromTemplateAndData(String templateLayoutJson, String title, String content, String subject, String lesson) {
+        // Build JSON safely (avoid String.format issues with '%' and escape quotes/newlines correctly)
         try {
             JsonNode templateNode;
             if (templateLayoutJson != null && !templateLayoutJson.isBlank()) {
@@ -515,6 +455,7 @@ public class BatchService {
 
             return objectMapper.writeValueAsString(root);
         } catch (Exception e) {
+            // Last-resort fallback: keep raw template JSON and JSON-escape title/content
             try {
                 String safeTemplate = (templateLayoutJson != null && !templateLayoutJson.isBlank())
                         ? templateLayoutJson
