@@ -3,14 +3,14 @@ spring:
     name: quickslide-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/quickslide_db
+    url: jdbc:postgresql://localhost:5432/quick_slide
     username: postgres
-    password: admin
+    password: Vinhle@3011
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
