@@ -47,6 +47,7 @@ export default function RegisterPage() {
       router.push('/login'); // Hoặc '/placeholders' tùy luồng của bạn
     } catch (err: any) {
       setError(err.response?.data?.message || '登録に失敗しました。もう一度お試しください。');
+      console.error(err);
     } finally {
       setLoading(false);
     }
