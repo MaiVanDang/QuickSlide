@@ -1,93 +1,89 @@
--- ============================
 -- TABLE: users
--- ============================
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS users (
+    id            bigserial PRIMARY KEY,
+    username      varchar(255) NOT NULL,
+    email         varchar(255) NOT NULL,
+    password_hash varchar(255) NOT NULL,
+    settings_json text,
+    created_at    timestamptz,
+    updated_at    timestamptz,
+    CONSTRAINT uk_users_username UNIQUE (username),
+    CONSTRAINT uk_users_email UNIQUE (email)
 );
 
--- ============================
+-- TABLE: themes
+CREATE TABLE IF NOT EXISTS themes (
+    id            bigserial PRIMARY KEY,
+    name          varchar(255),
+    primary_color varchar(255),
+    font_stack    varchar(255),
+    is_public     boolean
+);
+
+-- TABLE: templates
+CREATE TABLE IF NOT EXISTS templates (
+    id                bigserial PRIMARY KEY,
+    owner_id          bigint NOT NULL,
+    name              varchar(255) NOT NULL,
+    description       varchar(255),
+    theme             varchar(255),
+    is_public         boolean,
+    is_deleted        boolean,
+    preview_image_url text,
+    created_at        timestamptz,
+    edited_at         timestamptz,
+    CONSTRAINT fk_templates_owner FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+CREATE INDEX IF NOT EXISTS idx_templates_owner_id ON templates(owner_id);
+
+-- TABLE: template_slides
+CREATE TABLE IF NOT EXISTS template_slides (
+    id          bigserial PRIMARY KEY,
+    template_id bigint NOT NULL,
+    layout_json text,
+    slide_order integer,
+    created_at  timestamptz,
+    CONSTRAINT fk_template_slides_template FOREIGN KEY (template_id) REFERENCES templates (id)
+);
+CREATE INDEX IF NOT EXISTS idx_template_slides_template_id ON template_slides(template_id);
+
 -- TABLE: presentations
--- ============================
-CREATE TABLE presentations (
-    presentation_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS presentations (
+    id                   bigserial PRIMARY KEY,
+    owner_id             bigint NOT NULL,
+    title                varchar(255) NOT NULL,
+    based_on_template_id bigint,
+    created_at           timestamptz,
+    edited_date          timestamptz,
+    CONSTRAINT fk_presentations_owner FOREIGN KEY (owner_id) REFERENCES users (id),
+    CONSTRAINT fk_presentations_based_on_template FOREIGN KEY (based_on_template_id) REFERENCES templates (id)
 );
+CREATE INDEX IF NOT EXISTS idx_presentations_owner_id ON presentations(owner_id);
+CREATE INDEX IF NOT EXISTS idx_presentations_based_on_template_id ON presentations(based_on_template_id);
 
-CREATE INDEX idx_presentations_user_id ON presentations(user_id);
-
--- ============================
 -- TABLE: slides
--- ============================
-CREATE TABLE slides (
-    slide_id SERIAL PRIMARY KEY,
-    presentation_id INT NOT NULL,
-    slide_order INT NOT NULL,
-    content JSONB,  -- Lưu chữ, hình, layout dưới dạng JSON
-    background_color VARCHAR(20),
-    background_image TEXT,
-
-    FOREIGN KEY (presentation_id) REFERENCES presentations(presentation_id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS slides (
+    id              bigserial PRIMARY KEY,
+    presentation_id bigint NOT NULL,
+    slide_index     integer NOT NULL,
+    content_json    text,
+    layout_used_id  bigint,
+    last_modified   timestamptz,
+    CONSTRAINT fk_slides_presentation FOREIGN KEY (presentation_id) REFERENCES presentations (id),
+    CONSTRAINT fk_slides_layout_used FOREIGN KEY (layout_used_id) REFERENCES template_slides (id)
 );
+CREATE INDEX IF NOT EXISTS idx_slides_presentation_id ON slides(presentation_id);
+CREATE INDEX IF NOT EXISTS idx_slides_layout_used_id ON slides(layout_used_id);
 
-CREATE INDEX idx_slides_presentation_id ON slides(presentation_id);
-
--- ============================
--- TABLE: assets (ảnh, icon, video…)
--- ============================
-CREATE TABLE assets (
-    asset_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    file_type VARCHAR(50),
-    file_url TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+-- TABLE: history_logs
+CREATE TABLE IF NOT EXISTS history_logs (
+    id          bigserial PRIMARY KEY,
+    user_id     bigint NOT NULL,
+    action_type varchar(255) NOT NULL,
+    entity_type varchar(255),
+    entity_id   bigint,
+    timestamp   timestamptz,
+    CONSTRAINT fk_history_logs_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
+CREATE INDEX IF NOT EXISTS idx_history_logs_user_id ON history_logs(user_id);
 
-CREATE INDEX idx_assets_user_id ON assets(user_id);
-
--- ============================
--- TABLE: themes (chủ đề slide)
--- ============================
-CREATE TABLE themes (
-    theme_id SERIAL PRIMARY KEY,
-    theme_name VARCHAR(100) NOT NULL,
-    thumbnail_url TEXT
-);
-
--- ============================
--- TABLE: slide_templates
--- ============================
-CREATE TABLE slide_templates (
-    template_id SERIAL PRIMARY KEY,
-    theme_id INT NOT NULL,
-    template_name VARCHAR(150) NOT NULL,
-    default_content JSONB,
-
-    FOREIGN KEY (theme_id) REFERENCES themes(theme_id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_templates_theme_id ON slide_templates(theme_id);
-
--- ============================
--- TABLE: history_logs (log thao tác)
--- ============================
-CREATE TABLE history_logs (
-    log_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    action VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);

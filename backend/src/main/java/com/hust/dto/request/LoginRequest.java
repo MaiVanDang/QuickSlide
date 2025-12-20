@@ -1,18 +1,15 @@
 package com.hust.dto.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class LoginRequest {
+    
+    // Key này phải khớp với Frontend gửi lên (trong auth.ts)
+    @NotBlank(message = "Vui lòng nhập email hoặc tên đăng nhập")
+    private String usernameOrEmail; 
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email must be valid")
-    private String email;
-
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
 }

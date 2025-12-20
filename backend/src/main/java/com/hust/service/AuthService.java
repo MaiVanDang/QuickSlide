@@ -4,79 +4,85 @@ import com.hust.dto.request.LoginRequest;
 import com.hust.dto.request.RegisterRequest;
 import com.hust.dto.response.AuthResponse;
 import com.hust.entity.User;
+import com.hust.exception.DuplicateException;
+import com.hust.exception.ResourceNotFoundException;
 import com.hust.repository.UserRepository;
 import com.hust.security.JwtUtil;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
+    @Autowired
+    private UserRepository userRepository;
 
-    public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil,
-                       AuthenticationManager authenticationManager) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-        this.authenticationManager = authenticationManager;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public AuthResponse register(RegisterRequest request) {
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // --- REGISTER (Sửa tham số đầu vào thành RegisterRequest) ---
+    @Transactional
+    public AuthResponse register(RegisterRequest request) { // [SỬA 2] Đổi AuthRequest -> RegisterRequest
+
+        // Kiểm tra confirm password
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new IllegalArgumentException("Mật khẩu và xác nhận mật khẩu không khớp.");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+        // Kiểm tra trùng username (Dùng request.getUsername() từ RegisterRequest)
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new DuplicateException("Tên người dùng đã được sử dụng.");
         }
 
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already taken");
+        // Kiểm tra trùng email
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateException("Email đã được đăng ký.");
         }
 
+        // Tạo user mới
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getUsername()); // Lấy từ field username
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setCreatedAt(Instant.now());
+        user.setUpdatedAt(Instant.now());
 
         User savedUser = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(savedUser.getEmail());
+        String token = jwtUtil.generateToken(savedUser.getUsername());
 
         return new AuthResponse(
                 token,
                 savedUser.getId(),
                 savedUser.getUsername(),
-                savedUser.getEmail()
-        );
+                "Đăng ký thành công");
     }
 
-    public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+    // --- LOGIN (Sửa tham số đầu vào thành LoginRequest) ---
+    public AuthResponse login(LoginRequest request) { // [SỬA 3] Đổi AuthRequest -> LoginRequest
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // LoginRequest chỉ chứa usernameOrEmail và password -> Không bị lỗi validate
+        // các trường thừa
+        User user = userRepository
+                .findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng"));
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Tên đăng nhập hoặc mật khẩu không đúng");
+        }
+
+        String token = jwtUtil.generateToken(user.getUsername());
 
         return new AuthResponse(
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getEmail()
-        );
+                "Đăng nhập thành công");
     }
 }
