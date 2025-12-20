@@ -35,31 +35,16 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource)) 
-
-            // 3. Quy tắc ủy quyền (Authorization Rules)
             .authorizeHttpRequests(auth -> auth
-                // **[FIX LỖI 403] Cho phép /auth/** (loại bỏ /api/ thừa) **
                 .requestMatchers("/auth/**").permitAll() 
-                
-                // Cho phép /help/** (loại bỏ /api/ thừa)
                 .requestMatchers("/help/**").permitAll() 
-
-                // Allow reading public templates without login
                 .requestMatchers(HttpMethod.GET, "/templates", "/templates/**").permitAll()
-
-                // Allow CORS preflight
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                
-                // Tất cả các request khác phải được xác thực
                 .anyRequest().authenticated()
             )
-            
-            // 4. Cấu hình quản lý Session (sử dụng STATELESS cho JWT)
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            
-            // 5. Thêm JWT Filter
             .addFilterBefore(
                 jwtAuthenticationFilter, 
                 UsernamePasswordAuthenticationFilter.class

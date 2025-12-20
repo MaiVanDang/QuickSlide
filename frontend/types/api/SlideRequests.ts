@@ -3,7 +3,5 @@ export interface QuickCreateRequest {
   lesson: string;
   title: string;
   content: string;
-  templateId?: number;
   layoutJson?: string;
-  layoutJsons?: string[];
 }

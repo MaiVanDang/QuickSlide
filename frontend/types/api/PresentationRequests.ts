@@ -17,8 +17,3 @@ export interface SlideContentRequest {
   content?: string;
   layoutJson?: string;
 }
-
-export interface CreatePresentationFromTemplateRequest {
-  templateId: number;
-  title?: string;
-}

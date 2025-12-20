@@ -342,7 +342,7 @@ export default function QuickCreatePreviewPage() {
       router.push(`/editor/presentations/${res.data.id}`);
     } catch (err: any) {
       console.error('Quick create failed', err);
-      setError('Tạo slide thất bại. Vui lòng thử lại.');
+      setError('Thiếu nội dung, vui lòng kiểm tra lại.');
     } finally {
       setIsCreating(false);
     }
