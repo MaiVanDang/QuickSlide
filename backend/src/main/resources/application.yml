@@ -3,9 +3,9 @@ spring:
     name: quickslide-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/quick_slide
+    url: jdbc:postgresql://localhost:5432/quickslide_db
     username: postgres
-    password: Vinhle@3011
+    password: admin
     driver-class-name: org.postgresql.Driver
 
   jpa:

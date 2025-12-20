@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/placeholders")
+@RequestMapping("/placeholders")
 public class PlaceholderController {
-    @Autowired private PlaceholderRepository placeholderRepo;
-    @Autowired private SlideRepository slideRepo;
+    @Autowired
+    private PlaceholderRepository placeholderRepo;
+    @Autowired
+    private SlideRepository slideRepo;
 
     @GetMapping("/slide/{slideId}")
     public ResponseEntity<List<Placeholder>> getBySlide(@PathVariable Integer slideId) {

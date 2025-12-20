@@ -19,8 +19,6 @@ import com.hust.entity.Placeholder;
 import com.hust.repository.PresentationRepository;
 import com.hust.repository.TemplateRepository;
 
-import jakarta.validation.constraints.Null;
-
 @RestController
 @RequestMapping("/load")
 public class TemplateLoadController {
