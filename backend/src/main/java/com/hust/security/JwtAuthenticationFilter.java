@@ -52,14 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (UsernameNotFoundException e) {
-                // User referenced by token is not present in database (user deleted, token
-                // forged, etc.)
-                // Log and continue filter chain without authentication; the request will be
-                // treated as unauthenticated
                 logger.warn("User not found while validating token: {}", userEmail);
             } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
-                // jwt parse/validation errors should not crash the app -- just continue without
-                // authentication
                 logger.warn("Invalid JWT token for user {}: {}", userEmail, e.getMessage());
             }
         }

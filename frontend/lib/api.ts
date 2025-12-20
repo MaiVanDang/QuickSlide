@@ -59,5 +59,14 @@ export const authAPI = {
     return response.data;
   },
 };
-
+export const placeholderAPI = {
+  getBySlide: async (slideId: number) => {
+    const response = await api.get(`/placeholders/slide/${slideId}`);
+    return response.data;
+  },
+  save: async (data: any) => {
+    const response = await api.post('/placeholders/save', data);
+    return response.data;
+  },
+};
 export default api;
