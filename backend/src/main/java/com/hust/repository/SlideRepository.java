@@ -2,10 +2,13 @@ package com.hust.repository;
 
 import com.hust.entity.Slide;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 
-@Repository
-public interface SlideRepository extends JpaRepository<Slide, Integer> {
-    List<Slide> findByPresentationId(Integer presentationId);
+public interface SlideRepository extends JpaRepository<Slide, Long> {
+
+    // Lấy tất cả slide thuộc về một Presentation, sắp xếp theo index
+    List<Slide> findByPresentationIdOrderBySlideIndexAsc(Long presentationId);
+    
+    // NEW: Đếm số lượng slide trong một Presentation (dùng để xác định index mới)
+    long countByPresentationIdOrderBySlideIndexAsc(Long presentationId);
 }
