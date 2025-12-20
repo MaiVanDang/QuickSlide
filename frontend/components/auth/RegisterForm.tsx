@@ -12,7 +12,6 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form';
 
-// Luật nghiệp vụ: Username tối thiểu 6 ký tự, Password tối thiểu 6 ký tự. Confirm Password phải khớp.
 const RegisterSchema = z.object({
   username: z.string().min(6, 'Tên người dùng phải có ít nhất 6 ký tự'),
   email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
