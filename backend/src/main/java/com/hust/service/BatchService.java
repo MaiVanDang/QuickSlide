@@ -136,11 +136,20 @@ public class BatchService {
 
                 // Validation nghiệp vụ: (Business Rule No. 5)
                 if (nameBlank || contentBlank) {
+                    String errorMsg;
+                    if (nameBlank && contentBlank) {
+                        errorMsg = "Dòng " + (i + 1) + ": Dữ liệu trống.";
+                    } else if (nameBlank) {
+                        errorMsg = "Dòng " + (i + 1) + ": Thiếu Tiêu đề (Subject/Slide Name).";
+                    } else {
+                        errorMsg = "Dòng " + (i + 1) + ": Thiếu Nội dung slide.";
+                    }
+
                     dataList.add(SlideDataDTO.builder()
                             .name(name)
                             .content(content)
                             .error(true)
-                            .errorMessage("Tên Slide hoặc Nội dung không được trống.")
+                            .errorMessage(errorMsg) // Message chi tiết
                             .build());
                 } else {
                     dataList.add(SlideDataDTO.builder()
@@ -153,8 +162,7 @@ public class BatchService {
 
         } catch (IOException e) {
             log.error("Lỗi khi đọc file Excel: {}", e.getMessage());
-            throw new RuntimeException("Không thể xử lý tệp Excel/CSV.");
-        }
+            throw new IllegalArgumentException("Lỗi đọc file: Tệp Excel bị hỏng hoặc sai định dạng.");        }
 
         if (dataList.isEmpty()) {
             throw new IllegalArgumentException("Tệp không chứa dữ liệu slide hợp lệ.");
