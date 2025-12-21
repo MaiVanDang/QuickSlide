@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 import { addSlideToProjectApi, deleteSlideApi, getSlidesByProjectApi, updateSlideApi } from '@/lib/api';
 import { SlideResponse } from '@/types/api/SlideResponses';
@@ -36,6 +37,8 @@ type TemplateElement = {
   w: number;
   h: number;
   text?: string;
+  // When true, render `text` literally instead of auto-filled (batch/quick-create) content.
+  manualText?: boolean;
   style: ElementStyle;
 };
 
@@ -165,17 +168,34 @@ const resolveElementText = (
   const title = (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' ? data.name : '');
   const content = typeof data.content === 'string' ? data.content : '';
 
+  const raw = (el.text || '').trim();
+  const lower = raw.toLowerCase();
+  const looksLikePlaceholder =
+    /\{\{\s*[^}]+\s*\}\}/.test(raw) ||
+    ['subject', 'lesson', 'date', 'title', 'content'].some((k) => lower.includes(k));
+
   if (el.type === 'title') return title;
+
+  // Manual override: user wants literal text (but still allow placeholder tokens to resolve).
+  if (el.manualText) {
+    if (lower.includes('subject')) return typeof data.subject === 'string' ? data.subject : '';
+    if (lower.includes('lesson')) return typeof data.lesson === 'string' ? data.lesson : '';
+    if (lower.includes('date')) return new Date().toLocaleDateString();
+    if (lower.includes('title')) return title;
+    if (lower.includes('content')) return content;
+    return raw || '';
+  }
+
+  // Default behavior: prefer auto-filled batch/import content when available.
   if (assignedTextByElementId.has(el.id)) return assignedTextByElementId.get(el.id) ?? '';
   if (el.type === 'date') return new Date().toLocaleDateString();
   if (el.type === 'image') return '[Ảnh]';
 
-  const raw = (el.text || '').trim();
-  if (raw.includes('subject')) return typeof data.subject === 'string' ? data.subject : '';
-  if (raw.includes('lesson')) return typeof data.lesson === 'string' ? data.lesson : '';
-  if (raw.includes('date')) return new Date().toLocaleDateString();
-  if (raw.includes('title')) return title;
-  if (raw.includes('content')) return content;
+  if (lower.includes('subject')) return typeof data.subject === 'string' ? data.subject : '';
+  if (lower.includes('lesson')) return typeof data.lesson === 'string' ? data.lesson : '';
+  if (lower.includes('date')) return new Date().toLocaleDateString();
+  if (lower.includes('title')) return title;
+  if (lower.includes('content')) return content;
   return raw || '';
 };
 
@@ -203,6 +223,10 @@ export default function SlideEditorPage() {
 
       const currentSlide = slides[currentSlideIndex] ?? null;
       const parsedCurrent = React.useMemo(() => parseSlideContentJson(currentSlide?.contentJson), [currentSlide?.contentJson]);
+
+      // Editable data imported from Excel/QuickCreate (stored in contentJson.data).
+      // This lets users fix wrong values without re-importing.
+      const [slideData, setSlideData] = React.useState<Record<string, any>>({});
 
       const [elements, setElements] = React.useState<TemplateElement[]>([]);
       const [selectedElementId, setSelectedElementId] = React.useState<number | null>(null);
@@ -291,6 +315,8 @@ export default function SlideEditorPage() {
           ? parsedCurrent.elements
           : FALLBACK_ELEMENTS;
         setElements(next);
+        // Clone to avoid accidental mutations.
+        setSlideData({ ...(parsedCurrent.data || {}) });
       }, [currentSlideIndex, parsedCurrent.elements]);
 
       const setSlideIndexSafe = (nextIndex: number) => {
@@ -421,7 +447,7 @@ export default function SlideEditorPage() {
       const handleSave = async () => {
         if (!currentSlide) return;
 
-        const data = parsedCurrent.data || {};
+        const data = slideData || {};
         const title = (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' ? data.name : `Slide ${currentSlideIndex + 1}`);
         const content = typeof data.content === 'string' ? data.content : '';
 
@@ -474,7 +500,7 @@ export default function SlideEditorPage() {
       };
 
       const assigned = React.useMemo(() => {
-        const data = parsedCurrent.data || {};
+        const data = slideData || {};
         const content = typeof data.content === 'string' ? data.content : '';
         const map = new Map<number, string>();
 
@@ -497,10 +523,10 @@ export default function SlideEditorPage() {
           .sort((a, b) => (a.y - b.y) || (a.x - b.x));
         textBoxes.forEach((box, idx) => map.set(box.id, paragraphs[idx] ?? ''));
         return map;
-      }, [elements, parsedCurrent.data]);
+      }, [elements, slideData]);
 
       const getSlideLabel = (slide: SlideModel) => {
-        const parsed = parseSlideContentJson(slide.contentJson);
+        const parsed = parseSlideContentJson(slide?.contentJson);
         const data = parsed.data || {};
         return (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' && data.name) || `Slide ${slide.slideIndex}`;
       };
@@ -666,7 +692,7 @@ export default function SlideEditorPage() {
                                         : 'flex-end',
                                 }}
                               >
-                                {resolveElementText(el, parsedCurrent.data || {}, assigned)}
+                                {resolveElementText(el, slideData || {}, assigned)}
                               </div>
 
                               <div
@@ -686,19 +712,81 @@ export default function SlideEditorPage() {
                   )}
                 </div>
 
-                {selectedElement ? (
-                  <aside className="h-full border-l border-gray-200 bg-white overflow-auto p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <div className="text-sm text-gray-900 font-medium">Thuộc tính</div>
-                        <div className="text-xs text-gray-500">{selectedElement.type}</div>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedElementId(null)} className="hover:bg-gray-100">
+                <aside className="h-full border-l border-gray-200 bg-white overflow-auto p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="text-sm text-gray-900 font-medium">Chỉnh sửa dữ liệu</div>
+                      <div className="text-xs text-gray-500">Sửa nội dung import (không cần sửa lại Excel)</div>
+                    </div>
+                    {selectedElement ? (
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedElementId(null)} className="hover:bg-gray-100" aria-label="Bỏ chọn placeholder">
                         <X className="w-4 h-4" />
                       </Button>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <Label>Tiêu đề (title)</Label>
+                        <Input
+                          value={String((slideData?.title ?? slideData?.name ?? '') as any)}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            setSlideData((prev) => ({ ...(prev || {}), title: next }));
+                            setHasChanges(true);
+                          }}
+                          placeholder="Tiêu đề slide"
+                        />
+                      </div>
+                      <div>
+                        <Label>Môn (subject)</Label>
+                        <Input
+                          value={String((slideData?.subject ?? '') as any)}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            setSlideData((prev) => ({ ...(prev || {}), subject: next }));
+                            setHasChanges(true);
+                          }}
+                          placeholder="Ví dụ: Tiếng Nhật"
+                        />
+                      </div>
+                      <div>
+                        <Label>Bài (lesson)</Label>
+                        <Input
+                          value={String((slideData?.lesson ?? '') as any)}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            setSlideData((prev) => ({ ...(prev || {}), lesson: next }));
+                            setHasChanges(true);
+                          }}
+                          placeholder="Ví dụ: 第1課"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label>Nội dung (content)</Label>
+                        <Textarea
+                          value={String((slideData?.content ?? '') as any)}
+                          onChange={(e) => {
+                            const next = e.target.value;
+                            setSlideData((prev) => ({ ...(prev || {}), content: next }));
+                            setHasChanges(true);
+                          }}
+                          rows={6}
+                          placeholder="Nội dung được import từ Excel (có thể sửa trực tiếp ở đây)"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">Gợi ý: xuống dòng để tách đoạn; nội dung sẽ tự đổ vào các ô text/caption.</div>
+                      </div>
                     </div>
 
-                    <div className="space-y-3">
+                    {selectedElement ? (
+                      <>
+                        <div className="h-px bg-gray-200" />
+                        <div>
+                          <div className="text-sm text-gray-900 font-medium">Thuộc tính placeholder</div>
+                          <div className="text-xs text-gray-500">{selectedElement.type}</div>
+                        </div>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label>X</Label>
@@ -746,7 +834,19 @@ export default function SlideEditorPage() {
                         <Label>Text (placeholder)</Label>
                         <Input
                           value={selectedElement.text || ''}
-                          onChange={(e) => updateElement(selectedElement.id, (el) => ({ ...el, text: e.target.value }))}
+                          onChange={(e) =>
+                            updateElement(selectedElement.id, (el) => {
+                              const nextText = e.target.value;
+                              const raw = (nextText || '').trim();
+                              const lower = raw.toLowerCase();
+                              const looksLikePlaceholder =
+                                /\{\{\s*[^}]+\s*\}\}/.test(raw) ||
+                                ['subject', 'lesson', 'date', 'title', 'content'].some((k) => lower.includes(k));
+                              // Only treat as manual override when user types literal text.
+                              const manualText = raw.length > 0 && !looksLikePlaceholder;
+                              return { ...el, text: nextText, manualText };
+                            })
+                          }
                         />
                         <div className="text-xs text-gray-500 mt-1">Ví dụ: {'{{subject}}'}, {'{{lesson}}'}, {'{{date}}'}</div>
                       </div>
@@ -822,9 +922,12 @@ export default function SlideEditorPage() {
                           Underline
                         </Button>
                       </div>
-                    </div>
-                  </aside>
-                ) : null}
+                      </>
+                    ) : (
+                      <div className="text-sm text-gray-500">Chọn một placeholder để chỉnh vị trí/kích thước/font.</div>
+                    )}
+                  </div>
+                </aside>
               </div>
             </main>
           </div>
