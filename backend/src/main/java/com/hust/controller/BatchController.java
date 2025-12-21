@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/batch")
@@ -20,35 +21,40 @@ public class BatchController {
     @Autowired
     private BatchService batchService;
 
-    // --- 1. POST /api/batch/upload (No. 6: Tải lên và Xem trước) ---
+    // --- 1. POST /api/batch/upload ---
     @PostMapping("/upload")
-    public ResponseEntity<List<SlideDataDTO>> uploadAndPreview(@RequestParam("file") MultipartFile file) {
-        
-        // Dữ liệu đầu vào: Tệp Excel/CSV (MultipartFile)
+    public ResponseEntity<List<SlideDataDTO>> uploadAndPreview(
+            @RequestParam("file") MultipartFile file
+    ) {
         Long currentUserId = SecurityUtil.getCurrentUserId();
-        
-        // Service đọc file, parse data, và trả về preview (Bảng ⑤)
         List<SlideDataDTO> previewData = batchService.parseFile(file, currentUserId);
-        
-        return ResponseEntity.ok(previewData); 
+        return ResponseEntity.ok(previewData);
     }
 
-    // --- 2. POST /api/batch/generate (No. 6: Tạo Slide Hàng Loạt) ---
+    // --- 2. POST /api/batch/generate ---
     @PostMapping("/generate")
-    public ResponseEntity<List<PresentationResponse>> generateSlides(@Valid @RequestBody BatchGenerateRequest request) {
-        
-        // Dữ liệu đầu vào: JSON chứa các dòng data đã được xem trước (Bảng ⑤)
-        Long currentUserId = SecurityUtil.getCurrentUserId();
-        
-        // Service tạo 1 presentation cho mỗi dòng Excel
-        BatchService.BatchGenerateResult result = batchService.createBatchSlides(request, currentUserId);
+    public ResponseEntity<List<PresentationResponse>> generateSlides(
+            @Valid @RequestBody BatchGenerateRequest request
+    ) {
 
-        // Return warnings via header (keeps body backward-compatible)
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+        BatchService.BatchGenerateResult result =
+                batchService.createBatchSlides(request, currentUserId);
+
         List<String> warnings = result.getWarnings();
+
         if (warnings != null && !warnings.isEmpty()) {
-            String joined = String.join("\n", warnings);
-            // Avoid overly large headers
-            String safe = joined.length() > 1500 ? joined.substring(0, 1500) + "..." : joined;
+
+            // 🔥 FIX QUAN TRỌNG NHẤT: loại bỏ CR/LF khỏi header
+            String joined = warnings.stream()
+                    .map(w -> w == null ? "" : w.replaceAll("[\\r\\n]+", " ").trim())
+                    .collect(Collectors.joining("; "));
+
+            // tránh header quá dài (Tomcat mặc định ~8KB)
+            String safe = joined.length() > 1500
+                    ? joined.substring(0, 1500) + "..."
+                    : joined;
+
             return ResponseEntity.ok()
                     .header("X-Batch-Warning", safe)
                     .body(result.getCreated());
