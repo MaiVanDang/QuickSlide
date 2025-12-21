@@ -47,29 +47,54 @@ export default function BatchGenerationPage() {
     setTemplateSlideId(parsed && Number.isFinite(parsed) ? parsed : null);
   }, []);
 
+  const parseErrorMsg = (error: any, defaultMsg: string) => {
+    if (error?.response) {
+      const status = error.response.status;
+      const serverMsg = error.response.data?.message || error.response.data?.error;
+      
+      // Xử lý các lỗi cụ thể dựa trên HTTP Status
+      if (status === 400) return `Dữ liệu không hợp lệ: ${serverMsg || 'Vui lòng kiểm tra lại file.'}`;
+      if (status === 413) return 'File quá lớn, vui lòng giảm dung lượng.';
+      if (status === 415) return 'Định dạng file không hỗ trợ (chỉ nhận .xlsx).';
+      if (status === 500) return 'Lỗi hệ thống xử lý file. Vui lòng thử lại sau.';
+      
+      return serverMsg || defaultMsg;
+    }
+    if (error?.request) return 'Không thể kết nối đến máy chủ.';
+    return defaultMsg;
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    setFile(selectedFile);
     setFileName(selectedFile.name);
+    // Reset data cũ để tránh nhầm lẫn
+    setSlideData([]); 
     setIsUploading(true);
 
-    const loadingId = toast.loading('Đang tải lên và đọc dữ liệu...');
-
-    try {
-      // API: POST /api/batch/upload (multipart/form-data)
-      const res = await uploadBatchFileApi(selectedFile);
-      setSlideData((res.data || []) as any);
-      toast.success('Tải file dữ liệu thành công', { id: loadingId });
-    } catch (error) {
-      toast.error('Tải lên hoặc phân tích file thất bại.', { id: loadingId });
-      setSlideData([]);
-      setFile(null);
-      setFileName('');
-    } finally {
-      setIsUploading(false);
-    }
+    // Sử dụng toast.promise để quản lý trạng thái
+    toast.promise(
+      // Promise thực thi
+      uploadBatchFileApi(selectedFile),
+      {
+        loading: 'Đang tải lên và phân tích dữ liệu...',
+        success: (res) => {
+          setFile(selectedFile);
+          setSlideData((res.data || []) as any);
+          setIsUploading(false);
+          return `Đọc file thành công! Tìm thấy ${(res.data as any)?.length || 0} slide.`;
+        },
+        error: (err) => {
+          setFile(null);
+          setFileName('');
+          setSlideData([]);
+          setIsUploading(false);
+          // Gọi hàm parseErrorMsg để hiển thị lỗi chi tiết
+          return parseErrorMsg(err, 'Không thể đọc file. Vui lòng thử lại.');
+        },
+      }
+    );
   };
 
   const handleGenerate = async () => {
@@ -89,22 +114,15 @@ export default function BatchGenerationPage() {
       ...(templateId ? null : templateSlideId ? { templateSlideId } : null),
     };
 
-    const loadingId = toast.loading('Đang xử lý tạo slide hàng loạt...');
+    toast.promise(
+      generateBatchSlidesApi(data),
+      {
+        loading: 'Đang khởi tạo slide... Vui lòng không tắt trình duyệt.',
+        success: (res) => {
+            const created = Array.isArray(res?.data) ? res.data : [];
+            const first = created[0] ?? null;
 
-    try {
-      const res = await generateBatchSlidesApi(data);
-      const created = Array.isArray(res?.data) ? res.data : [];
-      const first = created[0] ?? null;
-      if (!first?.id) throw new Error('Không nhận được ID thuyết trình từ API.');
-
-      const warningHeader = (res as any)?.headers?.['x-batch-warning'] as string | undefined;
-      if (warningHeader) {
-        // Still create presentations, but inform user that some content was truncated.
-        toast.warning('Một số nội dung đã bị cắt bớt theo mẫu template', { description: warningHeader });
-      }
-
-      // Lưu danh sách bài thuyết trình được tạo để editor có thể chuyển qua lại.
-      // Format: [{ id, title }]
+            if (!first?.id) throw new Error('Phản hồi API không hợp lệ.');
       qcStorage.set(
         BG_CREATED_PRESENTATIONS_KEY,
         JSON.stringify(
