@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出力形式とファイル名の設定</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --light-color: #f5f7fa;
+            --dark-color: #333;
+            --success-color: #28a745;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 15px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background-color: white;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .radio-item input[type="radio"] {
+            display: none;
+        }
+
+        .radio-item span {
+            margin-left: 8px;
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .radio-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .radio-item input[type="radio"]:checked + span {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .radio-item input[type="radio"]:checked ~ .radio-item {
+            border-color: var(--primary-color);
+        }
+
+        .radio-item:checked {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 111, 165, 0.08);
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            margin-top: 8px;
+            transition: var(--transition);
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .download-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(74, 111, 165, 0.3);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .hint {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .radio-item {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>出力設定</h1>
+        
+        <div class="form-group">
+            <label>出力形式を選んでください</label>
+            <div class="radio-group">
+                <label class="radio-item">
+                    <input type="radio" name="format" value="pdf" checked>
+                    <span>PDF</span>
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="format" value="pptx">
+                    <span>PPTX</span>
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="format" value="png">
+                    <span>PNG</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="filename">ファイル名を入力してください</label>
+            <input 
+                type="text" 
+                id="filename" 
+                class="file-input" 
+                placeholder="例: レポート_2025" 
+                value="レポート_2025"
+            >
+        </div>
+
+        <button class="download-btn" id="downloadBtn">ダウンロード</button>
+
+        <p class="hint">※ ファイル名は英数字、アンダースコア、ハイフンのみ使用可能です。</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const formatRadios = document.querySelectorAll('input[name="format"]');
+            const filenameInput = document.getElementById('filename');
+
+            // ファイル名の入力制限（英数字、アンダースコア、ハイフンのみ）
+            filenameInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9_\-]/g, '');
+            });
+
+            // ダウンロード処理
+            downloadBtn.addEventListener('click', function() {
+                const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+                let fileName = filenameInput.value.trim();
+
+                // ファイル名が空の場合はデフォルト名を使用
+                if (!fileName) {
+                    fileName = "出力ファイル";
+                }
+
+                // 拡張子を追加（ユーザーが入力した拡張子を上書き）
+                if (!fileName.endsWith('.' + selectedFormat)) {
+                    fileName += '.' + selectedFormat;
+                }
+
+                // 空のファイルを生成してダウンロード（デモ用）
+                const blob = new Blob([''], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                // ダウンロード完了メッセージ（オプション）
+                alert(`「${fileName}」をダウンロードしました！`);
+            });
+        });
+    </script>
+</body>
+</html>
+
