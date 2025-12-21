@@ -33,7 +33,7 @@ public class SlideDataDTO {
 
     private String errorMessage;
 
-    // Các cột khác (nếu có)
+    // Các cột khác (nếu có) - giữ thứ tự cột như trong file Excel
     @Builder.Default
     private Map<String, Object> additionalData = new HashMap<>();
 
