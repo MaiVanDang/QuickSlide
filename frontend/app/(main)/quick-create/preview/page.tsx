@@ -151,7 +151,7 @@ const resolveElementText = (
   if (el.type === 'title') return slideTitle;
   if (assignedTextByElementId.has(el.id)) return assignedTextByElementId.get(el.id) ?? '';
   if (el.type === 'date') return new Date().toLocaleDateString();
-  if (el.type === 'image') return '[Ảnh]';
+  if (el.type === 'image') return '[画像]';
 
   const raw = (el.text || '').trim();
   if (raw.includes('subject')) return form.subject;
@@ -313,7 +313,7 @@ export default function QuickCreatePreviewPage() {
       const requestTitle = firstParsed.title?.trim() ?? '';
 
       if (!requestTitle) {
-        setError('Vui lòng nhập tiêu đề ở dòng đầu tiên của nội dung.');
+        setError('コンテンツの最初の行にタイトルを入力してください');
         return;
       }
 
@@ -326,23 +326,23 @@ export default function QuickCreatePreviewPage() {
       const res = await quickCreateSlideApi(
         templateId && Number.isFinite(templateId)
           ? {
-              ...basePayload,
-              templateId,
-            }
+            ...basePayload,
+            templateId,
+          }
           : {
-              ...basePayload,
-              ...(customLayoutJsons && customLayoutJsons.length > 0
-                ? { layoutJsons: customLayoutJsons }
-                : { layoutJson }),
-            },
+            ...basePayload,
+            ...(customLayoutJsons && customLayoutJsons.length > 0
+              ? { layoutJsons: customLayoutJsons }
+              : { layoutJson }),
+          },
       );
 
       qcStorage.remove(QC_FORM_KEY);
 
       router.push(`/editor/presentations/${res.data.id}`);
     } catch (err: any) {
-      console.error('Quick create failed', err);
-      setError('Thiếu nội dung, vui lòng kiểm tra lại.');
+      console.error('クイック作成に失敗しました', err);
+      setError('コンテンツの最初の行にタイトルを入力してください');
     } finally {
       setIsCreating(false);
     }
@@ -352,24 +352,24 @@ export default function QuickCreatePreviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-gray-900">Xem trước</h1>
-          <p className="text-sm text-gray-600">Kiểm tra bố cục trước khi tạo</p>
+          <h1 className="text-2xl text-gray-900">プレビュー</h1>
+          <p className="text-sm text-gray-600">作成する前にレイアウトを確認</p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button onClick={() => router.push('/quick-create/form')} variant="outline" className="border-gray-300">
-            Quay lại
+            戻る
           </Button>
           <Button onClick={handleCreate} disabled={isCreating || !formData} className="bg-blue-600 hover:bg-blue-700">
             {isCreating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Đang tạo...
+                作成中...
               </>
             ) : (
               <>
                 <Eye className="w-4 h-4 mr-2" />
-                Tạo slide
+                スライドを作成
               </>
             )}
           </Button>
@@ -379,12 +379,12 @@ export default function QuickCreatePreviewPage() {
       {showNav && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Slide {activeSlideIndex + 1}/{previewSlideCount}
-            {templateSlides && isLoadingTemplateSlides ? ' (đang tải...)' : ''}
+            スライド {activeSlideIndex + 1}/{previewSlideCount}
+            {templateSlides && isLoadingTemplateSlides ? ' (読み込み中...)' : ''}
           </div>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" className="border-gray-300" disabled={activeSlideIndex <= 0} onClick={() => goToSlide(activeSlideIndex - 1)}>
-              Prev
+              前
             </Button>
             <Button
               type="button"
@@ -393,7 +393,7 @@ export default function QuickCreatePreviewPage() {
               disabled={activeSlideIndex >= previewSlideCount - 1}
               onClick={() => goToSlide(activeSlideIndex + 1)}
             >
-              Next
+              次
             </Button>
           </div>
         </div>
@@ -424,7 +424,7 @@ export default function QuickCreatePreviewPage() {
                 const idx = Math.max(0, (el.slotIndex ?? 1) - 1);
                 if (el.type === 'text') assigned.set(el.id, structured.texts[idx] ?? '');
                 else if (el.type === 'caption') assigned.set(el.id, structured.captions[idx] ?? '');
-                else if (el.type === 'image') assigned.set(el.id, structured.images[idx] ?? '[Ảnh]');
+                else if (el.type === 'image') assigned.set(el.id, structured.images[idx] ?? '[画像]');
                 else if (el.type === 'date') assigned.set(el.id, structured.dates[idx] ?? new Date().toLocaleDateString());
               }
             } else {

@@ -7,9 +7,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex">
       {/* Cột Trái: Vui vẻ, sinh động, học tiếng Nhật */}
-      <ThemeVisual 
+      <ThemeVisual
         title="QuickSlide"
-        subtitle="Tạo Slide Học Tập Dễ Dàng"
+        subtitle="学習スライドを簡単に作成"
         quote="新しいアカウントで今すぐ始めましょう！"
         emoji={['📚', '✨', '🎓', '🌟']} // Emoji khác để thay đổi
       />

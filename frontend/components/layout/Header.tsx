@@ -9,11 +9,11 @@ import { Home as HomeIcon, Layout, Search, Settings, HelpCircle, LogOut } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 // Định nghĩa Interface cho props của NavItem
@@ -27,43 +27,43 @@ interface NavItemProps {
 // import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = React.useState('');
-  // const { logout } = useAuth(); // Giả định hook logout
+  const router = useRouter();
+  const pathname = usePathname();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  // const { logout } = useAuth(); // Giả định hook logout
 
-  const handleLogout = () => {
+  const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('quickslide_jwt_token');
       document.cookie = 'quickslide_auth_token=; path=/; max-age=0';
       router.push('/login');
     }
-  };
+  };
 
-  // SỬA LỖI: Áp dụng Interface NavItemProps
-  const NavItem = ({ href, icon: Icon, label }: NavItemProps) => {
-    const isActive = pathname === href;
-  const activeClasses = isActive ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600';
-    return (
-      <button 
-        onClick={() => router.push(href)}
-  className={`flex items-center gap-0 pb-0.5 transition-colors ${activeClasses}`}
-      >
-    <Icon className="w-4 h-4" />
-      <span className="ml-[1px]">{label}</span>
-      </button>
-    );
-  };
+  // SỬA LỖI: Áp dụng Interface NavItemProps
+  const NavItem = ({ href, icon: Icon, label }: NavItemProps) => {
+    const isActive = pathname === href;
+    const activeClasses = isActive ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600';
+    return (
+      <button
+        onClick={() => router.push(href)}
+        className={`flex items-center gap-0 pb-0.5 transition-colors ${activeClasses}`}
+      >
+        <Icon className="w-4 h-4" />
+        <span className="ml-[1px]">{label}</span>
+      </button>
+    );
+  };
 
-  return (
+  return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-4 md:py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4 min-w-[220px]">
             <h1 className="text-xl sm:text-2xl font-semibold text-blue-600 cursor-default">QuickSlide</h1>
             <nav className="flex gap-4 text-base sm:text-lg">
-              <NavItem href="/dashboard" icon={HomeIcon} label="Trang Chủ" />
-              <NavItem href="/templates" icon={Layout} label="Mẫu" />
+              <NavItem href="/dashboard" icon={HomeIcon} label="ホームページ" />
+              <NavItem href="/templates" icon={Layout} label="サンプル" />
             </nav>
           </div>
 
@@ -74,7 +74,7 @@ export function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm"
+                placeholder="検索"
                 className="pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-blue-500 w-full text-sm"
               />
             </div>
@@ -103,5 +103,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
+  );
 }

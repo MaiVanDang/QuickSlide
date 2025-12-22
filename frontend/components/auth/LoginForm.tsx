@@ -13,8 +13,8 @@ import { AuthResponse } from '@/types/api/AuthResponses';
 
 // Định nghĩa Schema validation dựa trên luật nghiệp vụ (Bắt buộc nhập)
 const LoginSchema = z.object({
-  usernameOrEmail: z.string().min(1, 'Vui lòng nhập tên người dùng hoặc địa chỉ email'),
-  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
+  usernameOrEmail: z.string().min(1, 'ユーザー名またはメールアドレスを入力してください'),
+  password: z.string().min(1, 'パスワードを入力してください'),
 });
 
 type LoginRequest = z.infer<typeof LoginSchema>;
@@ -41,7 +41,7 @@ export function LoginForm() {
       if (!response.ok) {
         // Xử lý lỗi đăng nhập thất bại
         const errorData = await response.json();
-        const errorMessage = errorData.message || 'Tên người dùng hoặc mật khẩu không chính xác';
+        const errorMessage = errorData.message || 'ユーザー名またはパスワードが間違っています';
         form.setError('root.serverError', { message: errorMessage });
         return;
       }
@@ -53,7 +53,7 @@ export function LoginForm() {
       // Cookie cho middleware (không thể đặt HttpOnly từ client)
       document.cookie = `quickslide_auth_token=${authData.token}; path=/; max-age=86400`;
 
-      router.push('/dashboard'); 
+      router.push('/dashboard');
     } catch (error) {
       form.setError('root.serverError', { message: 'ネットワークエラーが発生しました' });
     }
@@ -62,8 +62,8 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <h2 className="text-3xl text-gray-900 mb-2">Đăng Nhập</h2>
-        <p className="text-gray-600">Vui lòng đăng nhập vào tài khoản của bạn</p>
+        <h2 className="text-3xl text-gray-900 mb-2">ログイン</h2>
+        <p className="text-gray-600">アカウントにログインしてください</p>
       </div>
 
       <Form {...form}>
@@ -73,8 +73,8 @@ export function LoginForm() {
             control={form.control} name="usernameOrEmail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tên người dùng hoặc Email</FormLabel>
-                <FormControl><Input placeholder="Email hoặc tên người dùng" {...field} /></FormControl>
+                <FormLabel>ユーザー名またはメールアドレス</FormLabel>
+                <FormControl><Input placeholder="メールアドレスまたはユーザー名" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -85,17 +85,17 @@ export function LoginForm() {
             control={form.control} name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mật Khẩu</FormLabel>
-                <FormControl><Input type="password" placeholder="Nhập mật khẩu" {...field} /></FormControl>
+                <FormLabel>パスワード</FormLabel>
+                <FormControl><Input type="password" placeholder="パスワード" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
           {form.formState.errors.root?.serverError && (
-              <p className="text-sm text-red-600 text-center">
-                  {form.formState.errors.root.serverError.message}
-              </p>
+            <p className="text-sm text-red-600 text-center">
+              {form.formState.errors.root.serverError.message}
+            </p>
           )}
 
           <div className="flex items-center justify-between">
@@ -108,19 +108,19 @@ export function LoginForm() {
           {/* Nút Đăng nhập - Luật AC3: Disabled cho đến khi cả hai trường có dữ liệu */}
           <Button
             type="submit"
-            className="w-full bg-blue-600 disabled:bg-blue-300" 
+            className="w-full bg-blue-600 disabled:bg-blue-300"
             disabled={!isValid || isSubmitting}
           >
             {isSubmitting ? '処理中...' : (
-                <>
-                  <LogIn className="w-5 h-5 mr-2" />
-                  サインイン
-                </>
+              <>
+                <LogIn className="w-5 h-5 mr-2" />
+                サインイン
+              </>
             )}
           </Button>
         </form>
       </Form>
-      
+
       {/* Link Đăng ký */}
       <div className="mt-6 text-center">
         <p className="text-gray-600">

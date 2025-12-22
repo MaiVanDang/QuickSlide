@@ -28,10 +28,10 @@ function SaveExportPageInner() {
 
   // Luật nghiệp vụ: Tên file (③) là bắt buộc.
   const isFileNameValid = fileName.trim().length > 0;
-  
+
   // Luật nghiệp vụ: Nút Xuất (⑥) chỉ được kích hoạt khi Tên file VÀ ít nhất một định dạng được chọn.
   const isExportEnabled = isFileNameValid && !!selectedFormat;
-  
+
   // Nút Lưu (⑤) chỉ cần Tên file
   const isSaveEnabled = isFileNameValid;
 
@@ -45,7 +45,7 @@ function SaveExportPageInner() {
 
     setIsExporting(true);
     console.log(`Exporting ${fileName} to format: ${selectedFormat} with font: ${selectedFont}`);
-    
+
     const sanitizeFilePart = (value: string) => {
       return value
         .trim()
@@ -72,11 +72,11 @@ function SaveExportPageInner() {
         const parsed = JSON.parse(raw);
         const items = Array.isArray(parsed)
           ? parsed
-              .map((x) => ({
-                id: Number(x?.id),
-                title: typeof x?.title === 'string' ? x.title : undefined,
-              }))
-              .filter((x) => Number.isFinite(x.id) && x.id > 0)
+            .map((x) => ({
+              id: Number(x?.id),
+              title: typeof x?.title === 'string' ? x.title : undefined,
+            }))
+            .filter((x) => Number.isFinite(x.id) && x.id > 0)
           : [];
         if (items.length <= 1) return null;
         // Chỉ coi là batch nếu presentationId hiện tại thuộc batch.
@@ -90,7 +90,7 @@ function SaveExportPageInner() {
 
     try {
       if (!Number.isFinite(presentationId)) {
-        throw new Error('Thiếu presentationId để xuất file.');
+        throw new Error('ファイルをエクスポートするためのプレゼンテーション ID がありません');
       }
 
       const normalized = (selectedFormat || 'bin').toUpperCase();
@@ -102,7 +102,7 @@ function SaveExportPageInner() {
         if (normalized === 'PDF' || normalized === 'PPTX') {
           for (let i = 0; i < batchItems.length; i++) {
             const item = batchItems[i];
-            const titlePart = item.title ? sanitizeFilePart(item.title) : `presentation-${item.id}`;
+            const titlePart = item.title ? sanitizeFilePart(item.title) : `プレゼンテーション-${item.id}`;
             const base = sanitizeFilePart(fileName);
             const suffix = `${String(i + 1).padStart(2, '0')}_${titlePart}`;
             const ext = normalized.toLowerCase();
@@ -125,12 +125,12 @@ function SaveExportPageInner() {
 
         if (normalized === 'PNG') {
           const zipOut = new JSZip();
-          const baseFolder = sanitizeFilePart(fileName) || 'batch-export';
+          const baseFolder = sanitizeFilePart(fileName) || 'バッチエクスポート';
           const root = zipOut.folder(baseFolder) ?? zipOut;
 
           for (let i = 0; i < batchItems.length; i++) {
             const item = batchItems[i];
-            const titlePart = item.title ? sanitizeFilePart(item.title) : `presentation-${item.id}`;
+            const titlePart = item.title ? sanitizeFilePart(item.title) : `プレゼンテーション-${item.id}`;
             const folderName = `${String(i + 1).padStart(2, '0')}_${titlePart}`;
             const targetFolder = root.folder(folderName) ?? root;
 
@@ -151,7 +151,7 @@ function SaveExportPageInner() {
           }
 
           const outBlob = await zipOut.generateAsync({ type: 'blob' });
-          const outName = `${sanitizeFilePart(fileName) || 'batch-export'}_PNG.zip`;
+          const outName = `${sanitizeFilePart(fileName) || 'バッチエクスポート'}_PNG.zip`;
           downloadBlob(outBlob, outName);
           router.push('/dashboard');
           return;
@@ -170,7 +170,7 @@ function SaveExportPageInner() {
 
       router.push('/dashboard');
     } catch (error: any) {
-      console.error('Export failed', error);
+      console.error('エクスポートに失敗しました', error);
 
       const maybeBlob: unknown = error?.response?.data;
       // exportPresentationApi dùng responseType='blob' nên lỗi JSON từ backend sẽ được trả về dưới dạng Blob.
@@ -180,9 +180,9 @@ function SaveExportPageInner() {
           try {
             const parsed = JSON.parse(text);
             const msg = parsed?.message || text;
-            alert(`Lỗi khi xuất file: ${msg}`);
+            alert(`ファイルのエクスポート中にエラーが発生しました: ${msg}`);
           } catch {
-            alert(`Lỗi khi xuất file: ${text}`);
+            alert(`ファイルのエクスポート中にエラーが発生しました: ${text}`);
           }
           return;
         } catch {
@@ -191,8 +191,8 @@ function SaveExportPageInner() {
       }
 
       const serverMsg = error?.response?.data?.message;
-      const msg = serverMsg || error?.message || 'Không xác định';
-      alert(`Lỗi khi xuất file: ${msg}`);
+      const msg = serverMsg || error?.message || '未定';
+      alert(`ファイルのエクスポート中にエラーが発生しました: ${msg}`);
     } finally {
       setIsExporting(false);
     }
@@ -200,10 +200,10 @@ function SaveExportPageInner() {
 
   const handleSave = async () => {
     if (!isSaveEnabled) return;
-    
+
     // Gửi yêu cầu lưu dự án tới API (PUT)
-    console.log(`Saving project as: ${fileName}`);
-    alert(`Đã Lưu Dự Án: ${fileName}`);
+    console.log(`プロジェクトを次の名前で保存: ${fileName}`);
+    alert(`プロジェクトが保存されました: ${fileName}`);
     // Vẫn ở màn hình hiện tại
   };
 
@@ -211,17 +211,17 @@ function SaveExportPageInner() {
     <div className="max-w-3xl mx-auto py-8">
       <Card className="border border-gray-200 p-8">
         <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl text-gray-900">Lưu và Xuất File</h2>
-            <Button onClick={() => router.back()} variant="ghost">
-                <BookOpen className="w-5 h-5 mr-2" />
-                Quay Lại Trình Biên Giập
-            </Button>
+          <h2 className="text-2xl text-gray-900">ファイルの保存とエクスポート</h2>
+          <Button onClick={() => router.back()} variant="ghost">
+            <BookOpen className="w-5 h-5 mr-2" />
+            圧縮エディタに戻る
+          </Button>
         </div>
 
         {/* ② Định dạng Tệp */}
         <div className="mb-8">
           <Label className="block text-sm mb-3 text-gray-700">
-            Chọn Định Dạng <span className="text-red-500">*</span>
+            フォーマットの選択 <span className="text-red-500">*</span>
           </Label>
           <div className="space-y-3">
             {['PDF', 'PNG', 'PPTX (PowerPoint)'].map((format) => (
@@ -229,23 +229,22 @@ function SaveExportPageInner() {
                 const key = format.split(' ')[0];
                 const isChecked = selectedFormat === key;
                 return (
-              <div
-                key={format}
-                className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
-                  isChecked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                }`}
-                onClick={() => handleFormatSelect(key)}
-              >
-                <Checkbox
-                  checked={isChecked}
-                  onCheckedChange={() => handleFormatSelect(key)}
-                  id={format}
-                  className="mr-3"
-                />
-                <Label htmlFor={format} className="flex-1 cursor-pointer">
-                  {format}
-                </Label>
-              </div>
+                  <div
+                    key={format}
+                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${isChecked ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                      }`}
+                    onClick={() => handleFormatSelect(key)}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={() => handleFormatSelect(key)}
+                      id={format}
+                      className="mr-3"
+                    />
+                    <Label htmlFor={format} className="flex-1 cursor-pointer">
+                      {format}
+                    </Label>
+                  </div>
                 );
               })()
             ))}
@@ -255,21 +254,21 @@ function SaveExportPageInner() {
         {/* ③ Tên File */}
         <div className="mb-8">
           <Label htmlFor="fileName" className="block text-sm mb-2 text-gray-700">
-            Tên File <span className="text-red-500">*</span>
+            ファイル名 <span className="text-red-500">*</span>
           </Label>
           <Input
             id="fileName"
             type="text"
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
-            placeholder="Nhập tên file"
+            placeholder="ファイル名を入力"
           />
         </div>
 
         {/* ④ Font */}
         <div className="mb-8">
           <Label htmlFor="font" className="block text-sm mb-2 text-gray-700">
-            Font
+            フォント
           </Label>
           <Select onValueChange={setSelectedFont} defaultValue={selectedFont}>
             <SelectTrigger className="w-full">
@@ -293,7 +292,7 @@ function SaveExportPageInner() {
             className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 disabled:border-blue-300 disabled:text-blue-300"
           >
             <Save className="w-5 h-5 mr-2" />
-            Lưu
+            保存
           </Button>
           {/* ⑥ Nút Xuất */}
           <Button
@@ -302,16 +301,16 @@ function SaveExportPageInner() {
             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300"
           >
             <Download className="w-5 h-5 mr-2" />
-            {isExporting ? 'Đang Xuất...' : 'Xuất'}
+            {isExporting ? 'エクスポート中...' : '輸出'}
           </Button>
         </div>
 
         {/* ⑦ Liên kết Hỗ trợ */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex gap-6 text-sm text-gray-600">
-            <a href="/help" className="hover:text-blue-600 transition-colors">Điều Khoản Sử Dụng</a>
-            <a href="/help" className="hover:text-blue-600 transition-colors">Chính Sách Riêng Tư</a>
-            <a href="/help" className="hover:text-blue-600 transition-colors">Hỗ Trợ Kỹ Thuật</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">利用規約</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">プライバシーポリシー</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">技術サポート</a>
           </div>
         </div>
       </Card>
@@ -321,7 +320,7 @@ function SaveExportPageInner() {
 
 export default function SaveExportPage() {
   return (
-    <React.Suspense fallback={<div className="max-w-3xl mx-auto py-8" />}> 
+    <React.Suspense fallback={<div className="max-w-3xl mx-auto py-8" />}>
       <SaveExportPageInner />
     </React.Suspense>
   );

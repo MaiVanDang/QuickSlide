@@ -30,9 +30,8 @@ function SettingsMenuItem({ category, icon: Icon, label, active, onClick }: Sett
       key={category}
       onClick={onClick}
       variant="ghost"
-      className={`w-full px-4 py-3 justify-start rounded-lg transition-colors flex items-center gap-3 ${
-        active ? 'bg-blue-100 text-blue-600 hover:bg-blue-100' : 'text-gray-700 hover:bg-gray-100'
-      }`}
+      className={`w-full px-4 py-3 justify-start rounded-lg transition-colors flex items-center gap-3 ${active ? 'bg-blue-100 text-blue-600 hover:bg-blue-100' : 'text-gray-700 hover:bg-gray-100'
+        }`}
     >
       <Icon className="w-5 h-5" />
       {label}
@@ -77,16 +76,16 @@ export default function SettingsPage() {
       case 'language':
         return (
           <section>
-            <h2 className="text-2xl mb-6 text-gray-900">Cài Đặt Ngôn Ngữ</h2>
+            <h2 className="text-2xl mb-6 text-gray-900">言語設定</h2>
             <RadioGroup
               value={language}
               onValueChange={(val) => updateSetting(() => setLanguage(val as any))}
               className="space-y-4"
             >
               {[
-                { code: 'ja', label: 'Tiếng Nhật' },
-                { code: 'en', label: 'English' },
-                { code: 'vi', label: 'Tiếng Việt' },
+                { code: 'ja', label: '日本語' },
+                { code: 'en', label: '英語' },
+                { code: 'vi', label: 'ベトナム語' },
               ].map((item) => (
                 <div
                   key={item.code}
@@ -105,7 +104,7 @@ export default function SettingsPage() {
       case 'theme':
         return (
           <section>
-            <h2 className="text-2xl mb-6 text-gray-900">Cài Đặt Chủ Đề</h2>
+            <h2 className="text-2xl mb-6 text-gray-900">テーマ設定</h2>
             <RadioGroup
               value={theme}
               onValueChange={(val) => updateSetting(() => setTheme(val as any))}
@@ -114,13 +113,13 @@ export default function SettingsPage() {
               <div className="flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50">
                 <RadioGroupItem value="light" id="theme-light" />
                 <Label htmlFor="theme-light" className="cursor-pointer">
-                  Chế Độ Sáng
+                  明るさモード
                 </Label>
               </div>
               <div className="flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50">
                 <RadioGroupItem value="dark" id="theme-dark" />
                 <Label htmlFor="theme-dark" className="cursor-pointer">
-                  Chế Độ Tối
+                  ダークモード
                 </Label>
               </div>
             </RadioGroup>
@@ -130,12 +129,12 @@ export default function SettingsPage() {
       case 'font':
         return (
           <section>
-            <h2 className="text-2xl mb-6 text-gray-900">Cài Đặt Font</h2>
+            <h2 className="text-2xl mb-6 text-gray-900">フォント設定</h2>
             <div>
-              <Label className="block mb-3 text-gray-700">Font Mặc Định</Label>
+              <Label className="block mb-3 text-gray-700">デフォルトフォント</Label>
               <Select value={font} onValueChange={(val) => updateSetting(() => setFont(val))}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn font" />
+                  <SelectValue placeholder="フォントを選択" />
                 </SelectTrigger>
                 <SelectContent>
                   {['Noto Sans JP', 'Yu Gothic', 'MS Gothic', 'Meiryo'].map((f) => (
@@ -146,7 +145,7 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
               <p className="mt-3 text-sm text-gray-500" style={{ fontFamily: font }}>
-                Xem Trước: ABC 123
+                プレビュー: ABC 123
               </p>
             </div>
           </section>
@@ -155,9 +154,9 @@ export default function SettingsPage() {
       case 'color':
         return (
           <section>
-            <h2 className="text-2xl mb-6 text-gray-900">Cài Đặt Màu Nền</h2>
+            <h2 className="text-2xl mb-6 text-gray-900">背景色設定</h2>
             <div>
-              <Label className="block mb-3 text-gray-700">Màu Nền Slide</Label>
+              <Label className="block mb-3 text-gray-700">スライドの背景色</Label>
               <div className="flex items-center gap-4">
                 <Input
                   type="color"
@@ -179,18 +178,18 @@ export default function SettingsPage() {
       case 'other':
         return (
           <section>
-            <h2 className="text-2xl mb-6 text-gray-900">Cài Đặt Khác</h2>
+            <h2 className="text-2xl mb-6 text-gray-900">その他の設定</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
-                <Label>Bật Tự Động Lưu</Label>
+                <Label>自動保存を有効にする</Label>
                 <Switch checked={autoSave} onCheckedChange={(val) => updateSetting(() => setAutoSave(Boolean(val)))} />
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
-                <Label>Hiển Thị Thông Báo</Label>
+                <Label>通知を表示する</Label>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-300 rounded-lg">
-                <Label>Gửi Dữ Liệu Phân Tích</Label>
+                <Label>分析データを送信する</Label>
                 <Switch defaultChecked />
               </div>
             </div>
@@ -206,40 +205,40 @@ export default function SettingsPage() {
     <div className="flex gap-6">
       <aside className="w-64">
         <Card className="p-4 border border-gray-200">
-          <h3 className="text-sm mb-4 text-gray-700">Menu Danh Mục Cài Đặt</h3>
+          <h3 className="text-sm mb-4 text-gray-700">メニュー設定</h3>
           <div className="space-y-1">
             <SettingsMenuItem
               category="language"
               icon={Globe}
-              label="Ngôn Ngữ"
+              label="言語"
               active={activeCategory === 'language'}
               onClick={() => setActiveCategory('language')}
             />
             <SettingsMenuItem
               category="theme"
               icon={Palette}
-              label="Chủ Đề"
+              label="テーマ"
               active={activeCategory === 'theme'}
               onClick={() => setActiveCategory('theme')}
             />
             <SettingsMenuItem
               category="font"
               icon={Type}
-              label="Font"
+              label="フォント"
               active={activeCategory === 'font'}
               onClick={() => setActiveCategory('font')}
             />
             <SettingsMenuItem
               category="color"
               icon={Droplet}
-              label="Màu Nền"
+              label="背景色"
               active={activeCategory === 'color'}
               onClick={() => setActiveCategory('color')}
             />
             <SettingsMenuItem
               category="other"
               icon={SettingsIcon}
-              label="Khác"
+              label="その他の設定"
               active={activeCategory === 'other'}
               onClick={() => setActiveCategory('other')}
             />
@@ -252,7 +251,7 @@ export default function SettingsPage() {
           <div className="flex justify-end gap-3 mb-6">
             <Button onClick={handleReset} variant="outline" className="border-gray-300 hover:bg-gray-100">
               <RotateCcw className="w-4 h-4 mr-2" />
-              Đặt Lại
+              リセット
             </Button>
             <Button
               onClick={handleSave}

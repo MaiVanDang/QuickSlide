@@ -76,7 +76,8 @@ function DashboardPageInner() {
   const refreshKey = searchParams.get('refresh') || '';
   const [isLoading, setIsLoading] = React.useState(false);
   const [recentProjects, setRecentProjects] = React.useState<
-    { kind: 'presentation' | 'template';
+    {
+      kind: 'presentation' | 'template';
       id: number;
       title: string;
       ownerUsername: string;
@@ -112,72 +113,72 @@ function DashboardPageInner() {
   };
 
   const fetchRecents = React.useCallback(async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const tokenExists = hasAuthToken();
+      const tokenExists = hasAuthToken();
 
-        const [presentationsResult, templatesResult] = await Promise.allSettled([
-          getRecentProjectsApi(),
-          tokenExists ? getTemplatesApi('mine') : Promise.resolve({ data: [] as TemplateResponse[] } as any),
-        ]);
+      const [presentationsResult, templatesResult] = await Promise.allSettled([
+        getRecentProjectsApi(),
+        tokenExists ? getTemplatesApi('mine') : Promise.resolve({ data: [] as TemplateResponse[] } as any),
+      ]);
 
-        // If the backend restarted and JWT signing secret changed, existing tokens become invalid.
-        // Surface this clearly instead of silently showing empty/stale data.
-        if (presentationsResult.status === 'rejected') {
-          const status = getAxiosStatus(presentationsResult.reason);
-          if (status === 401 || status === 403) {
-            clearAuthToken();
-            setRecentProjects([]);
-            setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-            return;
-          }
+      // If the backend restarted and JWT signing secret changed, existing tokens become invalid.
+      // Surface this clearly instead of silently showing empty/stale data.
+      if (presentationsResult.status === 'rejected') {
+        const status = getAxiosStatus(presentationsResult.reason);
+        if (status === 401 || status === 403) {
+          clearAuthToken();
+          setRecentProjects([]);
+          setError('ログインセッションが期限切れです。再度ログインしてください。');
+          return;
         }
+      }
 
-        const presentations: PresentationResponse[] =
-          presentationsResult.status === 'fulfilled' ? (presentationsResult.value.data || []) : [];
+      const presentations: PresentationResponse[] =
+        presentationsResult.status === 'fulfilled' ? (presentationsResult.value.data || []) : [];
 
-        const templates: TemplateResponse[] =
-          templatesResult.status === 'fulfilled' ? (templatesResult.value.data || []) : [];
+      const templates: TemplateResponse[] =
+        templatesResult.status === 'fulfilled' ? (templatesResult.value.data || []) : [];
 
-        const recentTemplates = templates
-          .slice()
-          .sort(
-            (a, b) =>
-              parseApiDateMs(b.editedAt || b.createdAt) - parseApiDateMs(a.editedAt || a.createdAt),
-          )
-          .slice(0, 10)
-          .map((t) => ({
-            kind: 'template' as const,
-            id: t.id,
-            title: t.name,
-            ownerUsername: t.ownerUsername,
-            editedDate: t.editedAt || t.createdAt,
-            href: `/templates/${t.id}`,
-          }));
-
-        const recentPresentations = presentations.map((p) => ({
-          kind: 'presentation' as const,
-          id: p.id,
-          title: p.title,
-          ownerUsername: p.ownerUsername,
-          editedDate: p.editedDate,
-          href: `/editor/presentations/${p.id}`,
+      const recentTemplates = templates
+        .slice()
+        .sort(
+          (a, b) =>
+            parseApiDateMs(b.editedAt || b.createdAt) - parseApiDateMs(a.editedAt || a.createdAt),
+        )
+        .slice(0, 10)
+        .map((t) => ({
+          kind: 'template' as const,
+          id: t.id,
+          title: t.name,
+          ownerUsername: t.ownerUsername,
+          editedDate: t.editedAt || t.createdAt,
+          href: `/templates/${t.id}`,
         }));
 
-        const merged = [...recentTemplates, ...recentPresentations]
-          .sort((a, b) => parseApiDateMs(b.editedDate) - parseApiDateMs(a.editedDate))
-          .slice(0, 10);
+      const recentPresentations = presentations.map((p) => ({
+        kind: 'presentation' as const,
+        id: p.id,
+        title: p.title,
+        ownerUsername: p.ownerUsername,
+        editedDate: p.editedDate,
+        href: `/editor/presentations/${p.id}`,
+      }));
 
-        setRecentProjects(merged);
-      } catch (err) {
-        console.error('Failed to load recent projects', err);
-        setError('Không tải được danh sách dự án gần đây');
-      } finally {
-        setIsLoading(false);
-      }
-    }, []);
+      const merged = [...recentTemplates, ...recentPresentations]
+        .sort((a, b) => parseApiDateMs(b.editedDate) - parseApiDateMs(a.editedDate))
+        .slice(0, 10);
+
+      setRecentProjects(merged);
+    } catch (err) {
+      console.error('最近のプロジェクトの読み込みに失敗しました', err);
+      setError('最近のプロジェクトのリストを読み込めません');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
     fetchRecents();
@@ -208,12 +209,12 @@ function DashboardPageInner() {
     <div className="space-y-12">
       {/* ⑧ Khu vực Tùy chọn Tạo */}
       <section>
-        <h2 className="text-xl mb-6 text-gray-900">Tạo Mới</h2>
+        <h2 className="text-xl mb-6 text-gray-900">新しい</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <CreationOption
             icon={Layout}
-            title="Template Editing"
-            description="Tạo template tùy chỉnh"
+            title="テンプレート編集"
+            description="カスタムテンプレートを作成する"
             bgColor="bg-blue-100"
             hoverBgColor="bg-blue-200"
             textColor="text-blue-600"
@@ -221,8 +222,8 @@ function DashboardPageInner() {
           />
           <CreationOption
             icon={Zap}
-            title="Quick Creation"
-            description="Tạo slide nhanh chóng"
+            title="クイック作成"
+            description="クイックにスライドを作成"
             bgColor="bg-green-100"
             hoverBgColor="bg-green-200"
             textColor="text-green-600"
@@ -230,8 +231,8 @@ function DashboardPageInner() {
           />
           <CreationOption
             icon={FileSpreadsheet}
-            title="Batch Generation"
-            description="Tạo nhiều slide cùng lúc"
+            title="バッチ生成"
+            description="複数のスライドを一度に作成"
             bgColor="bg-purple-100"
             hoverBgColor="bg-purple-200"
             textColor="text-purple-600"
@@ -242,7 +243,7 @@ function DashboardPageInner() {
 
       {/* ⑨ Khu vực Dự án gần đây */}
       <section>
-        <h2 className="text-xl mb-6 text-gray-900">Dự Án Gần Đây</h2>
+        <h2 className="text-xl mb-6 text-gray-900">最近のプロジェクト</h2>
         <Card className="border border-gray-200 overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-4">
@@ -256,15 +257,15 @@ function DashboardPageInner() {
             <Table>
               <TableHeader className="bg-gray-50 border-b border-gray-200">
                 <TableRow>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Tên Dự Án</TableHead>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Tác Giả</TableHead>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Ngày Chỉnh Sửa</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">プロジェクト名</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">作成者</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">編集日時</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-200">
                 {recentProjects.map((project) => (
-                  <TableRow 
-                    key={`${project.kind}-${project.id}`} 
+                  <TableRow
+                    key={`${project.kind}-${project.id}`}
                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => router.push(project.href)}
                   >

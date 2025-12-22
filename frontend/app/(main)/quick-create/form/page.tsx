@@ -30,7 +30,7 @@ const QuickCreateSchema = z.object({
     .string()
     .min(1, '内容を入力してください')
     .refine((v) => Boolean(getFirstNonEmptyLine(v)), {
-      message: 'Vui lòng nhập tiêu đề ở dòng đầu tiên của nội dung.',
+      message: 'コンテンツの冒頭にタイトルを入力してください',
     }),
 });
 
@@ -104,10 +104,10 @@ export default function QuickCreationFormPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Tên Môn Học <span className="text-red-500">*</span>
+                    科目名 <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Ví dụ: Tiếng Nhật Cơ Bản" {...field} />
+                    <Input placeholder="例: 基本的な日本語" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,11 +139,10 @@ export default function QuickCreationFormPage() {
                     内容 <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea rows={8} placeholder="Dòng đầu tiên là tiêu đề. Các dòng sau là nội dung..." {...field} />
+                    <Textarea rows={8} placeholder="最初の行はタイトルです。次の行はコンテンツです" {...field} />
                   </FormControl>
                   <p className="text-xs text-gray-500">
-                    Mẹo: Bạn có thể chia nhiều đoạn bằng cách xuống 1 dòng trống hoặc bắt đầu đoạn mới bằng{' '}
-                    <span className="font-medium">- </span>.
+                    ヒント: 空白行を追加するか、ハイフン (-) を使用して新しい段落を開始することで、テキストを複数の段落に分割できます
                   </p>
                   <FormMessage />
                 </FormItem>
