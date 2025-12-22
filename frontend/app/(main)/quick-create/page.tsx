@@ -358,7 +358,7 @@ export default function QuickCreatePlaceholderPage() {
           }
         })
         .catch((err) => {
-          console.error('Load template slides failed', err);
+          console.error('テンプレートスライドの読み込みに失敗しました', err);
           setTemplateSlides(null);
           setTemplateId(null);
           qcStorage.remove(QC_TEMPLATE_ID_KEY);

@@ -83,19 +83,19 @@ export function Header() {
               <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-md inline-flex items-center justify-center">
                 <Settings className="w-5 h-5 text-gray-600" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 bg-white">
                 <DropdownMenuItem onClick={() => router.push('/settings')}>
                   <Settings className="w-4 h-4 mr-2" />
-                  Cài Đặt
+                  設定
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/help')}>
                   <HelpCircle className="w-4 h-4 mr-2" />
-                  Trợ Giúp
+                  ヘルプ
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:!bg-red-50">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Đăng Xuất
+                  ログアウト
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
