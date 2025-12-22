@@ -207,6 +207,8 @@ export default function SlideEditorPage() {
       const [elements, setElements] = React.useState<TemplateElement[]>([]);
       const [selectedElementId, setSelectedElementId] = React.useState<number | null>(null);
 
+      const [dataState, setDataState] = React.useState<Record<string, any>>({});
+
       const canvasRef = React.useRef<HTMLDivElement | null>(null);
       const [dragging, setDragging] = React.useState<{ id: number; offsetX: number; offsetY: number } | null>(null);
       const [resizing, setResizing] = React.useState<{
@@ -292,6 +294,11 @@ export default function SlideEditorPage() {
           : FALLBACK_ELEMENTS;
         setElements(next);
       }, [currentSlideIndex, parsedCurrent.elements]);
+
+      React.useEffect(() => {
+        // Sync editable slide data separately so we can edit title/content
+        setDataState(parsedCurrent.data || {});
+      }, [currentSlideIndex, parsedCurrent.data]);
 
       const setSlideIndexSafe = (nextIndex: number) => {
         if (nextIndex === currentSlideIndex) return;
@@ -421,7 +428,7 @@ export default function SlideEditorPage() {
       const handleSave = async () => {
         if (!currentSlide) return;
 
-        const data = parsedCurrent.data || {};
+        const data = dataState || {};
         const title = (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' ? data.name : `Slide ${currentSlideIndex + 1}`);
         const content = typeof data.content === 'string' ? data.content : '';
 
@@ -474,7 +481,7 @@ export default function SlideEditorPage() {
       };
 
       const assigned = React.useMemo(() => {
-        const data = parsedCurrent.data || {};
+        const data = dataState || {};
         const content = typeof data.content === 'string' ? data.content : '';
         const map = new Map<number, string>();
 
@@ -497,11 +504,12 @@ export default function SlideEditorPage() {
           .sort((a, b) => (a.y - b.y) || (a.x - b.x));
         textBoxes.forEach((box, idx) => map.set(box.id, paragraphs[idx] ?? ''));
         return map;
-      }, [elements, parsedCurrent.data]);
+      }, [elements, dataState]);
 
       const getSlideLabel = (slide: SlideModel) => {
         const parsed = parseSlideContentJson(slide.contentJson);
-        const data = parsed.data || {};
+        const baseData = parsed.data || {};
+        const data = slide.id === currentSlide?.id ? (dataState || baseData) : baseData;
         return (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' && data.name) || `Slide ${slide.slideIndex}`;
       };
 
@@ -623,6 +631,27 @@ export default function SlideEditorPage() {
                     <div className="text-sm text-gray-500">Không có slide.</div>
                   ) : (
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
+                      <div className="mb-4">
+                        <Label>Tiêu đề</Label>
+                        <Input
+                          value={String(dataState.title ?? dataState.name ?? '')}
+                          onChange={(e) => {
+                            setDataState((d) => ({ ...d, title: e.target.value }));
+                            setHasChanges(true);
+                          }}
+                        />
+
+                        <Label className="mt-2">Nội dung</Label>
+                        <textarea
+                          value={String(dataState.content ?? '')}
+                          onChange={(e) => {
+                            setDataState((d) => ({ ...d, content: e.target.value }));
+                            setHasChanges(true);
+                          }}
+                          className="w-full rounded-md border border-gray-300 p-2 text-sm min-h-[80px]"
+                        />
+                      </div>
+
                       <div
                         ref={canvasRef}
                         className="relative mx-auto select-none"
@@ -666,7 +695,7 @@ export default function SlideEditorPage() {
                                         : 'flex-end',
                                 }}
                               >
-                                {resolveElementText(el, parsedCurrent.data || {}, assigned)}
+                                {resolveElementText(el, dataState || {}, assigned)}
                               </div>
 
                               <div
