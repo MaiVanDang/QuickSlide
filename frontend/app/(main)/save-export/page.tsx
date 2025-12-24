@@ -21,7 +21,7 @@ function SaveExportPageInner() {
   const presentationId = Number(searchParams.get('presentationId'));
 
   const BG_CREATED_PRESENTATIONS_KEY = 'quickslide_bg_created_presentations_v1';
-  const [fileName, setFileName] = React.useState('Slide_2025-12-13');
+  const [fileName, setFileName] = React.useState('Slides Export');
   const [selectedFormat, setSelectedFormat] = React.useState<string | null>(null); // ② Định dạng
   const [selectedFont, setSelectedFont] = React.useState('Noto Sans JP'); // ④ Font
   const [isExporting, setIsExporting] = React.useState(false);

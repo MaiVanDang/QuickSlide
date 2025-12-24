@@ -1360,12 +1360,20 @@ export default function TemplateEditorPage() {
 
                   <div>
                     <Label className="text-xs text-gray-600 mb-2">文字色</Label>
-                    <Input
+                    <input
                       type="color"
-                      className="w-full h-10 border border-gray-300 rounded"
+                      className="w-full h-10 border border-gray-300 rounded cursor-pointer"
+                      value={selectedElement.style.color}
+                      title="Chọn màu cho văn bản"
+                      placeholder="#111827"
+                      onChange={(e) => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, color: e.target.value } }))}
+                    />
+                    <Input
+                      className="mt-2"
                       value={selectedElement.style.color}
                       onChange={(e) => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, color: e.target.value } }))}
                     />
+                    <div className="text-xs text-gray-500 mt-1">Chọn màu hoặc nhập mã màu (hex)</div>
                   </div>
 
                   <div>

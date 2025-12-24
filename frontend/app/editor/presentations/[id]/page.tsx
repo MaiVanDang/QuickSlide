@@ -888,7 +888,21 @@ export default function SlideEditorPage() {
 
                       <div>
                         <Label>色</Label>
+                        <input
+                          type="color"
+                          className="w-full h-10 border border-gray-300 rounded cursor-pointer"
+                          value={selectedElement.style?.color || '#111827'}
+                          title="Chọn màu cho văn bản"
+                          placeholder="#111827"
+                          onChange={(e) =>
+                            updateElement(selectedElement.id, (el) => ({
+                              ...el,
+                              style: { ...el.style, color: e.target.value },
+                            }))
+                          }
+                        />
                         <Input
+                          className="mt-2"
                           value={selectedElement.style?.color || '#111827'}
                           onChange={(e) =>
                             updateElement(selectedElement.id, (el) => ({
@@ -897,6 +911,7 @@ export default function SlideEditorPage() {
                             }))
                           }
                         />
+                        <div className="text-xs text-gray-500 mt-1">Chọn màu hoặc nhập mã màu (hex)</div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2">
