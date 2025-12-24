@@ -9,7 +9,7 @@ export default function LoginPage() {
       {/* Cột Trái: Vui vẻ, sinh động, học tiếng Nhật */}
       <ThemeVisual 
         title="QuickSlide"
-        subtitle="Tạo Slide Học Tập Dễ Dàng"
+        subtitle="学習用スライドを簡単に作成"
         quote="楽しく、速く、簡単にプレゼンテーションを作成"
         emoji={['あ', 'ア', '漢', '🎌']}
       />
