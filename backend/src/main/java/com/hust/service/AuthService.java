@@ -37,17 +37,17 @@ public class AuthService {
 
         // Kiểm tra confirm password
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Mật khẩu và xác nhận mật khẩu không khớp.");
+            throw new IllegalArgumentException("パスワードと確認用パスワードが一致しません。");
         }
 
         // Kiểm tra trùng username (Dùng request.getUsername() từ RegisterRequest)
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new DuplicateException("Tên người dùng đã được sử dụng.");
+            throw new DuplicateException("ユーザー名は既に使用されています。");
         }
 
         // Kiểm tra trùng email
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new DuplicateException("Email đã được đăng ký.");
+            throw new DuplicateException("メールアドレスは既に登録されています。");
         }
 
         // Tạo user mới
@@ -66,7 +66,7 @@ public class AuthService {
                 token,
                 savedUser.getId(),
                 savedUser.getUsername(),
-                "Đăng ký thành công"
+            "登録に成功しました"
         );
     }
 
@@ -76,10 +76,10 @@ public class AuthService {
         // LoginRequest chỉ chứa usernameOrEmail và password -> Không bị lỗi validate các trường thừa
         User user = userRepository
                 .findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng"));
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザー名またはパスワードが正しくありません"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Tên đăng nhập hoặc mật khẩu không đúng");
+            throw new IllegalArgumentException("ユーザー名またはパスワードが正しくありません");
         }
 
         String token = jwtUtil.generateToken(user.getUsername());
@@ -88,7 +88,7 @@ public class AuthService {
                 token,
                 user.getId(),
                 user.getUsername(),
-                "Đăng nhập thành công"
+            "ログインに成功しました"
         );
     }
 }

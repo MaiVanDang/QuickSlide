@@ -62,8 +62,8 @@ export function Header() {
           <div className="flex items-center gap-4 min-w-[220px]">
             <h1 className="text-xl sm:text-2xl font-semibold text-blue-600 cursor-default">QuickSlide</h1>
             <nav className="flex gap-4 text-base sm:text-lg">
-              <NavItem href="/dashboard" icon={HomeIcon} label="Trang Chủ" />
-              <NavItem href="/templates" icon={Layout} label="Mẫu" />
+              <NavItem href="/dashboard" icon={HomeIcon} label="ホーム" />
+              <NavItem href="/templates" icon={Layout} label="テンプレート" />
             </nav>
           </div>
 
@@ -74,7 +74,7 @@ export function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm"
+                placeholder="検索"
                 className="pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-blue-500 w-full text-sm"
               />
             </div>
@@ -83,19 +83,22 @@ export function Header() {
               <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-md inline-flex items-center justify-center">
                 <Settings className="w-5 h-5 text-gray-600" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent 
+    align="end" 
+    className="w-48 bg-gray-50 border border-gray-200 text-gray-900 shadow-lg rounded-lg"
+  >
                 <DropdownMenuItem onClick={() => router.push('/settings')}>
                   <Settings className="w-4 h-4 mr-2" />
-                  Cài Đặt
+                  設定
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/help')}>
                   <HelpCircle className="w-4 h-4 mr-2" />
-                  Trợ Giúp
+                  ヘルプ
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:!bg-red-50">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Đăng Xuất
+                  ログアウト
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -112,15 +112,15 @@ const defaultTextFor = (type: ElementType, slotIndex?: number) => {
   const suffix = typeof slotIndex === 'number' ? ` #${slotIndex}` : '';
   switch (type) {
     case 'title':
-      return 'Tiêu đề';
+      return 'タイトル';
     case 'text':
-      return `Nội dung${suffix}`;
+      return `内容${suffix}`;
     case 'caption':
-      return `Chú thích${suffix}`;
+      return `キャプション${suffix}`;
     case 'variable':
       return '{{variable}}';
     case 'image':
-      return `Ảnh${suffix}`;
+      return `画像${suffix}`;
     case 'date':
       return '{{date}}';
     default:
@@ -647,7 +647,7 @@ export default function TemplateEditorPage() {
 
       const token = typeof window !== 'undefined' ? localStorage.getItem('quickslide_jwt_token') : null;
       if (!token) {
-        toast.error('Bạn cần đăng nhập để sửa template.');
+        toast.error('テンプレートを編集するにはログインが必要です。');
         router.push('/login');
         return;
       }
@@ -676,11 +676,11 @@ export default function TemplateEditorPage() {
         const status = err?.response?.status;
         console.error('Load template failed', err);
         if (status === 401 || status === 403) {
-          toast.error('Bạn không có quyền sửa template này.');
+          toast.error('このテンプレートを編集する権限がありません。');
           router.push('/templates');
           return;
         }
-        toast.error('Không tải được template để sửa.');
+        toast.error('編集用テンプレートを読み込めませんでした。');
         router.push('/templates');
       } finally {
         setIsSaving(false);
@@ -867,13 +867,13 @@ export default function TemplateEditorPage() {
 
   const handleSave = async () => {
     if (!templateName.trim()) {
-      toast.error('Vui lòng nhập tên template');
+      toast.error('テンプレート名を入力してください');
       return;
     }
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('quickslide_jwt_token') : null;
     if (!token) {
-      toast.error('Bạn cần đăng nhập để lưu template.');
+      toast.error('テンプレートを保存するにはログインが必要です。');
       router.push('/login');
       return;
     }
@@ -893,20 +893,20 @@ export default function TemplateEditorPage() {
 
       if (isNew) {
         await createTemplateApi(payload);
-        toast.success('Đã lưu template mới');
+        toast.success('新しいテンプレートを保存しました');
       } else {
         await updateTemplateApi(Number(idParam), payload);
-        toast.success('Đã cập nhật template');
+        toast.success('テンプレートを更新しました');
       }
       setHasChanges(false);
       router.push(`/templates?refresh=${Date.now()}`);
     } catch (err) {
       const status = (err as any)?.response?.status;
-      const message = (err as any)?.response?.data?.message || (err as any)?.message || 'Lưu template thất bại';
+      const message = (err as any)?.response?.data?.message || (err as any)?.message || 'テンプレートの保存に失敗しました';
       console.error('Save template failed', { status, message, err });
 
       if (status === 401 || status === 403) {
-        toast.error('Bạn cần đăng nhập để lưu template (JWT).');
+        toast.error('テンプレートを保存するにはログインが必要です（JWT）。');
         return;
       }
 
@@ -918,7 +918,7 @@ export default function TemplateEditorPage() {
 
   const handleDeleteTemplate = () => {
     if (isNew) {
-      toast.error('Template mới chưa được lưu để xóa');
+      toast.error('新しいテンプレートはまだ保存されていないため削除できません');
       return;
     }
     setShowDeleteModal(true);
@@ -928,11 +928,11 @@ export default function TemplateEditorPage() {
     if (isNew || !idParam) return;
     try {
       await deleteTemplateApi(Number(idParam));
-      toast.success('Đã xóa template của bạn (public vẫn dùng được)');
+      toast.success('テンプレートを削除しました（公開ライブラリは引き続き利用できます）');
       router.push('/templates');
     } catch (err) {
       console.error('Delete template failed', err);
-      toast.error('Xóa template thất bại');
+      toast.error('テンプレートの削除に失敗しました');
     }
   };
 
@@ -1035,7 +1035,7 @@ export default function TemplateEditorPage() {
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={handleExit} aria-label="Quay lại" className="text-blue-600 hover:text-blue-700">
+            <button onClick={handleExit} aria-label="戻る" className="text-blue-600 hover:text-blue-700">
               <BookOpen className="w-6 h-6" />
             </button>
             <Input
@@ -1045,7 +1045,7 @@ export default function TemplateEditorPage() {
                 setTemplateName(e.target.value);
                 setHasChanges(true);
               }}
-              placeholder="Nhập tên template"
+              placeholder="テンプレート名を入力"
               className="text-xl border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none px-2 py-1 transition-colors h-auto font-semibold"
             />
 
@@ -1058,21 +1058,21 @@ export default function TemplateEditorPage() {
                 }}
               >
                 <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Theme" />
+                  <SelectValue placeholder="テーマ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="education">Education</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
+                  <SelectItem value="default">デフォルト</SelectItem>
+                  <SelectItem value="business">ビジネス</SelectItem>
+                  <SelectItem value="education">教育</SelectItem>
+                  <SelectItem value="creative">クリエイティブ</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-center gap-2">
-              <Label className="text-xs text-gray-600">Ảnh mẫu</Label>
-              <label className="text-xs px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-                Chọn ảnh
+              <Label className="text-xs text-gray-600 whitespace-nowrap shrink-0">プレビュー画像</Label>
+              <label className="text-xs px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer min-w-[120px] text-center whitespace-nowrap shrink-0">
+                画像を選択
                 <input
                   type="file"
                   accept="image/*"
@@ -1102,7 +1102,7 @@ export default function TemplateEditorPage() {
                     setHasChanges(true);
                   }}
                 >
-                  Xóa ảnh
+                  画像を削除
                 </Button>
               ) : null}
             </div>
@@ -1112,13 +1112,13 @@ export default function TemplateEditorPage() {
             {!isNew && (
               <Button onClick={handleDeleteTemplate} variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Xóa
+                削除
               </Button>
             )}
 
             <Button onClick={handleExit} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
               <X className="w-4 h-4 mr-2" />
-              Hủy
+              キャンセル
             </Button>
 
             <Button
@@ -1127,7 +1127,7 @@ export default function TemplateEditorPage() {
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300"
             >
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Đang lưu...' : 'Lưu'}
+              {isSaving ? '保存中...' : '保存'}
             </Button>
           </div>
         </div>
@@ -1135,7 +1135,7 @@ export default function TemplateEditorPage() {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
         <ResizablePanel defaultSize={15} minSize={10} className="bg-white border-r border-gray-200 p-4 overflow-y-auto">
-          <h3 className="text-sm mb-3 text-gray-700">Slides</h3>
+          <h3 className="text-sm mb-3 text-gray-700">スライド</h3>
           <div className="flex items-center justify-between gap-2 mb-2">
             <Button
               type="button"
@@ -1144,7 +1144,7 @@ export default function TemplateEditorPage() {
               disabled={activeSlideIndex <= 0}
               onClick={() => goToSlide(activeSlideIndex - 1)}
             >
-              Prev
+              前へ
             </Button>
             <div className="text-xs text-gray-600">
               {slides.length === 0 ? '0/0' : `${activeSlideIndex + 1}/${slides.length}`}
@@ -1156,13 +1156,13 @@ export default function TemplateEditorPage() {
               disabled={activeSlideIndex >= slides.length - 1}
               onClick={() => goToSlide(activeSlideIndex + 1)}
             >
-              Next
+              次へ
             </Button>
           </div>
 
           <div className="space-y-2 mb-6">
             <Button onClick={addSlide} variant="outline" className="w-full justify-start hover:border-blue-500">
-              <span className="text-sm">+ New slide</span>
+              <span className="text-sm">+ 新しいスライド</span>
             </Button>
             <Button
               onClick={deleteCurrentSlide}
@@ -1170,50 +1170,50 @@ export default function TemplateEditorPage() {
               className="w-full justify-start border-red-600 text-red-600 hover:bg-red-50"
               disabled={slides.length <= 1}
             >
-              <span className="text-sm">Delete slide</span>
+              <span className="text-sm">スライドを削除</span>
             </Button>
           </div>
 
-          <h3 className="text-sm mb-3 text-gray-700">Auto layout</h3>
+          <h3 className="text-sm mb-3 text-gray-700">自動レイアウト</h3>
           <div className="space-y-2 mb-6">
             <Button onClick={cycleAutoLayout} variant="outline" className="w-full justify-start hover:border-blue-500" disabled={elements.length === 0}>
               <Layout className="w-5 h-5 mr-3" />
-              <span className="text-sm">Đổi layout</span>
+              <span className="text-sm">レイアウト変更</span>
             </Button>
           </div>
 
-          <h3 className="text-sm mb-4 text-gray-700">Elements (Thêm Placeholder)</h3>
+          <h3 className="text-sm mb-4 text-gray-700">要素（プレースホルダー追加）</h3>
           <div className="space-y-2">
             <Button onClick={() => addElement('title')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <Type className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Title</span>
+              <span className="text-sm">+ タイトル</span>
             </Button>
             <Button onClick={() => addElement('text')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <Type className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Text</span>
+              <span className="text-sm">+ テキスト</span>
             </Button>
             <Button onClick={() => addElement('image')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <ImageIcon className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Image</span>
+              <span className="text-sm">+ 画像</span>
             </Button>
             <Button onClick={() => addElement('caption')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <Type className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Caption</span>
+              <span className="text-sm">+ キャプション</span>
             </Button>
             <Button onClick={() => addElement('variable')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <Variable className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Variable</span>
+              <span className="text-sm">+ 変数</span>
             </Button>
             <Button onClick={() => addElement('date')} variant="outline" className="w-full justify-start hover:border-blue-500">
               <Calendar className="w-5 h-5 mr-3" />
-              <span className="text-sm">+ Date</span>
+              <span className="text-sm">+ 日付</span>
             </Button>
           </div>
 
           <div className="mt-8">
             <Button onClick={() => setShowPreviewModal(true)} className="w-full bg-blue-600 hover:bg-blue-700">
               <BookOpen className="w-4 h-4 mr-2" />
-              Preview
+              プレビュー
             </Button>
           </div>
         </ResizablePanel>
@@ -1238,12 +1238,12 @@ export default function TemplateEditorPage() {
         <ResizableHandle withHandle className="bg-gray-100" />
 
         <ResizablePanel defaultSize={20} minSize={15} className="bg-white border-l border-gray-200 p-4 overflow-y-auto">
-          <h3 className="text-sm mb-4 text-gray-700">Thiết lập thuộc tính</h3>
+          <h3 className="text-sm mb-4 text-gray-700">属性設定</h3>
 
           {selectedElement ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">Đang chọn: {selectedElement.type}</div>
+                <div className="text-sm text-gray-700">選択中: {selectedElement.type}</div>
                 <Button
                   type="button"
                   variant="outline"
@@ -1251,12 +1251,12 @@ export default function TemplateEditorPage() {
                   onClick={deleteSelected}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Xóa
+                  削除
                 </Button>
               </div>
 
               <div>
-                <Label className="text-xs text-gray-600 mb-2">Vị trí / Kích thước</Label>
+                <Label className="text-xs text-gray-600 mb-2">位置 / サイズ</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     type="number"
@@ -1302,13 +1302,13 @@ export default function TemplateEditorPage() {
               {canEditText ? (
                 <>
                   <div>
-                    <Label className="text-xs text-gray-600 mb-2">Font</Label>
+                    <Label className="text-xs text-gray-600 mb-2">フォント</Label>
                     <Select
                       value={selectedElement.style.fontFamily}
                       onValueChange={(val) => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, fontFamily: val } }))}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn font" />
+                        <SelectValue placeholder="フォントを選択" />
                       </SelectTrigger>
                       <SelectContent>
                         {['Noto Sans JP', 'Yu Gothic', 'MS Gothic', 'Meiryo'].map((f) => (
@@ -1321,7 +1321,7 @@ export default function TemplateEditorPage() {
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-600 mb-2">Kích thước chữ</Label>
+                    <Label className="text-xs text-gray-600 mb-2">文字サイズ</Label>
                     <Input
                       type="number"
                       className="text-sm"
@@ -1339,27 +1339,27 @@ export default function TemplateEditorPage() {
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-600 mb-2">Định dạng</Label>
+                    <Label className="text-xs text-gray-600 mb-2">書式</Label>
                     <ToggleGroup
                       type="multiple"
                       className="justify-start gap-2"
                       value={formatValue(selectedElement)}
                       onValueChange={applyFormat}
                     >
-                      <ToggleGroupItem value="bold" aria-label="Toggle bold">
+                      <ToggleGroupItem value="bold" aria-label="太字の切り替え">
                         <Type className="w-4 h-4" />
                       </ToggleGroupItem>
-                      <ToggleGroupItem value="italic" aria-label="Toggle italic">
+                      <ToggleGroupItem value="italic" aria-label="斜体の切り替え">
                         <Type className="w-4 h-4" />
                       </ToggleGroupItem>
-                      <ToggleGroupItem value="underline" aria-label="Toggle underline">
+                      <ToggleGroupItem value="underline" aria-label="下線の切り替え">
                         <Type className="w-4 h-4" />
                       </ToggleGroupItem>
                     </ToggleGroup>
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-600 mb-2">Màu chữ</Label>
+                    <Label className="text-xs text-gray-600 mb-2">文字色</Label>
                     <Input
                       type="color"
                       className="w-full h-10 border border-gray-300 rounded"
@@ -1369,7 +1369,7 @@ export default function TemplateEditorPage() {
                   </div>
 
                   <div>
-                    <Label className="text-xs text-gray-600 mb-2">Nội dung</Label>
+                    <Label className="text-xs text-gray-600 mb-2">内容</Label>
                     <Input
                       ref={contentInputRef}
                       value={selectedElement.text ?? ''}
@@ -1379,11 +1379,11 @@ export default function TemplateEditorPage() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-gray-500">Loại placeholder này không có thuộc tính chữ.</p>
+                <p className="text-sm text-gray-500">このプレースホルダーには文字属性がありません。</p>
               )}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">Hãy chọn một placeholder để chỉnh sửa</p>
+            <p className="text-sm text-gray-500">編集するプレースホルダーを選択してください</p>
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -1391,8 +1391,8 @@ export default function TemplateEditorPage() {
       <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
         <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
-            <DialogTitle>Preview</DialogTitle>
-            <DialogDescription>Xem nhanh bố cục template (không chỉnh sửa).</DialogDescription>
+            <DialogTitle>プレビュー</DialogTitle>
+            <DialogDescription>テンプレートのレイアウトを確認（編集不可）。</DialogDescription>
           </DialogHeader>
 
           <div className="bg-gray-50 p-4 rounded-lg overflow-auto">
@@ -1407,7 +1407,7 @@ export default function TemplateEditorPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
-              Đóng
+              閉じる
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1416,15 +1416,15 @@ export default function TemplateEditorPage() {
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Chưa lưu thay đổi</DialogTitle>
-            <DialogDescription>Bạn có chắc muốn thoát mà không lưu thay đổi?</DialogDescription>
+            <DialogTitle>変更が保存されていません</DialogTitle>
+            <DialogDescription>保存せずに終了しますか？</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExitModal(false)}>
-              Hủy
+              キャンセル
             </Button>
             <Button variant="destructive" onClick={() => router.push('/templates')} className="bg-red-600 hover:bg-red-700">
-              Thoát không lưu
+              保存せずに退出
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1433,15 +1433,15 @@ export default function TemplateEditorPage() {
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Xóa Template</DialogTitle>
-            <DialogDescription>Bạn có chắc muốn xóa hoàn toàn template này?</DialogDescription>
+            <DialogTitle>テンプレートを削除</DialogTitle>
+            <DialogDescription>このテンプレートを完全に削除しますか？</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-              Hủy
+              キャンセル
             </Button>
             <Button variant="destructive" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Xóa
+              削除
             </Button>
           </DialogFooter>
         </DialogContent>

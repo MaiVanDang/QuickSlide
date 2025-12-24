@@ -9,7 +9,7 @@ export default function RegisterPage() {
       {/* Cột Trái: Vui vẻ, sinh động, học tiếng Nhật */}
       <ThemeVisual 
         title="QuickSlide"
-        subtitle="Tạo Slide Học Tập Dễ Dàng"
+        subtitle="学習用スライドを簡単に作成"
         quote="新しいアカウントで今すぐ始めましょう！"
         emoji={['📚', '✨', '🎓', '🌟']} // Emoji khác để thay đổi
       />

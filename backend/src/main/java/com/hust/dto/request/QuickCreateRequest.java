@@ -9,16 +9,16 @@ import java.util.List;
 @Data
 public class QuickCreateRequest {
 
-    @NotBlank(message = "Tên môn học là bắt buộc.")
+    @NotBlank(message = "科目は必須です。")
     private String subject; // 科目名 (③)
 
-    @NotBlank(message = "Buổi học là bắt buộc.")
+    @NotBlank(message = "授業回は必須です。")
     private String lesson; // 授業 (④)
 
-    @NotBlank(message = "Tiêu đề là bắt buộc.")
+    @NotBlank(message = "タイトルは必須です。")
     private String title; // タイトル (⑤)
 
-    @NotBlank(message = "Nội dung là bắt buộc.")
+    @NotBlank(message = "内容は必須です。")
     private String content; // 内容 (⑥)
 
     // Optional: if provided, backend will use all slides from this template (a deck)

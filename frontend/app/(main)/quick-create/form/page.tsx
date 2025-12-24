@@ -30,7 +30,7 @@ const QuickCreateSchema = z.object({
     .string()
     .min(1, '内容を入力してください')
     .refine((v) => Boolean(getFirstNonEmptyLine(v)), {
-      message: 'Vui lòng nhập tiêu đề ở dòng đầu tiên của nội dung.',
+      message: '内容の1行目にタイトルを入力してください。',
     }),
 });
 
@@ -104,10 +104,10 @@ export default function QuickCreationFormPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Tên Môn Học <span className="text-red-500">*</span>
+                    科目 <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Ví dụ: Tiếng Nhật Cơ Bản" {...field} />
+                    <Input placeholder="例: 日本語基礎" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,12 +139,22 @@ export default function QuickCreationFormPage() {
                     内容 <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea rows={8} placeholder="Dòng đầu tiên là tiêu đề. Các dòng sau là nội dung..." {...field} />
+                    <Textarea rows={8} placeholder="1行目がタイトルです。2行目以降が本文です..." {...field} />
                   </FormControl>
-                  <p className="text-xs text-gray-500">
-                    Mẹo: Bạn có thể chia nhiều đoạn bằng cách xuống 1 dòng trống hoặc bắt đầu đoạn mới bằng{' '}
-                    <span className="font-medium">- </span>.
-                  </p>
+                  <div className="text-xs text-gray-500 whitespace-pre-wrap leading-relaxed">
+                    内容の入力方法については、次のようなルールがあります。
+                    <br />
+                    <br />
+                    ・1行目は、デフォルトでタイトルの設定となります。
+                    <br />
+                    ・タイトルの入力が終わったら、必ず「Enter」キーを押して改行してください。
+                    <br />
+                    ・それ以降の内容は「画像リンク --&gt; 注釈 --&gt; 内容 --&gt; 時間」の順で読み取られます。
+                    <br />
+                    ・「\\--」を使用すると、次の属性へ移動します。
+                    <br />
+                    ・「\-」を使用すると、同じ属性内の次の項目へ移動します。
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

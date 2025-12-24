@@ -151,7 +151,7 @@ const resolveElementText = (
   if (el.type === 'title') return slideTitle;
   if (assignedTextByElementId.has(el.id)) return assignedTextByElementId.get(el.id) ?? '';
   if (el.type === 'date') return new Date().toLocaleDateString();
-  if (el.type === 'image') return '[Ảnh]';
+  if (el.type === 'image') return '[画像]';
 
   const raw = (el.text || '').trim();
   if (raw.includes('subject')) return form.subject;
@@ -313,7 +313,7 @@ export default function QuickCreatePreviewPage() {
       const requestTitle = firstParsed.title?.trim() ?? '';
 
       if (!requestTitle) {
-        setError('Vui lòng nhập tiêu đề ở dòng đầu tiên của nội dung.');
+        setError('内容の1行目にタイトルを入力してください。');
         return;
       }
 
@@ -342,7 +342,7 @@ export default function QuickCreatePreviewPage() {
       router.push(`/editor/presentations/${res.data.id}`);
     } catch (err: any) {
       console.error('Quick create failed', err);
-      setError('Thiếu nội dung, vui lòng kiểm tra lại.');
+      setError('タイトルのみで本文がありません。内容を入力してください。');
     } finally {
       setIsCreating(false);
     }
@@ -352,24 +352,24 @@ export default function QuickCreatePreviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-gray-900">Xem trước</h1>
-          <p className="text-sm text-gray-600">Kiểm tra bố cục trước khi tạo</p>
+          <h1 className="text-2xl text-gray-900">プレビュー</h1>
+          <p className="text-sm text-gray-600">作成前にレイアウトを確認</p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button onClick={() => router.push('/quick-create/form')} variant="outline" className="border-gray-300">
-            Quay lại
+            戻る
           </Button>
           <Button onClick={handleCreate} disabled={isCreating || !formData} className="bg-blue-600 hover:bg-blue-700">
             {isCreating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Đang tạo...
+                作成中...
               </>
             ) : (
               <>
                 <Eye className="w-4 h-4 mr-2" />
-                Tạo slide
+                スライドを作成
               </>
             )}
           </Button>
@@ -379,12 +379,12 @@ export default function QuickCreatePreviewPage() {
       {showNav && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Slide {activeSlideIndex + 1}/{previewSlideCount}
-            {templateSlides && isLoadingTemplateSlides ? ' (đang tải...)' : ''}
+            スライド {activeSlideIndex + 1}/{previewSlideCount}
+            {templateSlides && isLoadingTemplateSlides ? '（読み込み中...）' : ''}
           </div>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" className="border-gray-300" disabled={activeSlideIndex <= 0} onClick={() => goToSlide(activeSlideIndex - 1)}>
-              Prev
+              前へ
             </Button>
             <Button
               type="button"
@@ -393,7 +393,7 @@ export default function QuickCreatePreviewPage() {
               disabled={activeSlideIndex >= previewSlideCount - 1}
               onClick={() => goToSlide(activeSlideIndex + 1)}
             >
-              Next
+              次へ
             </Button>
           </div>
         </div>
@@ -424,7 +424,7 @@ export default function QuickCreatePreviewPage() {
                 const idx = Math.max(0, (el.slotIndex ?? 1) - 1);
                 if (el.type === 'text') assigned.set(el.id, structured.texts[idx] ?? '');
                 else if (el.type === 'caption') assigned.set(el.id, structured.captions[idx] ?? '');
-                else if (el.type === 'image') assigned.set(el.id, structured.images[idx] ?? '[Ảnh]');
+                else if (el.type === 'image') assigned.set(el.id, structured.images[idx] ?? '[画像]');
                 else if (el.type === 'date') assigned.set(el.id, structured.dates[idx] ?? new Date().toLocaleDateString());
               }
             } else {
@@ -449,32 +449,46 @@ export default function QuickCreatePreviewPage() {
               });
             }
 
-            return elements.map((el) => (
-              <div
-                key={el.id}
-                className="absolute rounded border border-gray-200 bg-white/90"
-                style={{ left: el.x, top: el.y, width: el.w, height: el.h }}
-              >
+            return elements.map((el) => {
+              const value = resolveElementText(el, slideForm, perSlideTitle, assigned);
+              if (el.type === 'image' && typeof value === 'string' && value.startsWith('http')) {
+                return (
+                  <div
+                    key={el.id}
+                    className="absolute rounded border border-gray-200 bg-white/90 flex items-center justify-center"
+                    style={{ left: el.x, top: el.y, width: el.w, height: el.h }}
+                  >
+                    <img src={value} alt="slide-img" className="max-w-full max-h-full object-contain" />
+                  </div>
+                );
+              }
+              return (
                 <div
-                  className="w-full h-full p-2 overflow-hidden"
-                  style={{
-                    color: el.style?.color || '#111827',
-                    fontFamily: el.style?.fontFamily || 'inherit',
-                    fontSize: el.style?.fontSize || 16,
-                    fontWeight: el.style?.bold ? 700 : 400,
-                    fontStyle: el.style?.italic ? 'italic' : 'normal',
-                    textDecoration: el.style?.underline ? 'underline' : 'none',
-                    textAlign: el.style?.align || 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent:
-                      el.style?.align === 'left' ? 'flex-start' : el.style?.align === 'center' ? 'center' : 'flex-end',
-                  }}
+                  key={el.id}
+                  className="absolute rounded border border-gray-200 bg-white/90"
+                  style={{ left: el.x, top: el.y, width: el.w, height: el.h }}
                 >
-                  {resolveElementText(el, slideForm, perSlideTitle, assigned)}
+                  <div
+                    className="w-full h-full p-2 overflow-hidden"
+                    style={{
+                      color: el.style?.color || '#111827',
+                      fontFamily: el.style?.fontFamily || 'inherit',
+                      fontSize: el.style?.fontSize || 16,
+                      fontWeight: el.style?.bold ? 700 : 400,
+                      fontStyle: el.style?.italic ? 'italic' : 'normal',
+                      textDecoration: el.style?.underline ? 'underline' : 'none',
+                      textAlign: el.style?.align || 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent:
+                        el.style?.align === 'left' ? 'flex-start' : el.style?.align === 'center' ? 'center' : 'flex-end',
+                    }}
+                  >
+                    {value}
+                  </div>
                 </div>
-              </div>
-            ));
+              );
+            });
           })()}
         </div>
       </Card>

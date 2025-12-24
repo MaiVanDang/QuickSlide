@@ -8,15 +8,15 @@ import lombok.Data;
 public class UserSettingsRequest {
 
     // Lựa chọn Ngôn ngữ (ja, en, vi)
-    @NotBlank(message = "Ngôn ngữ là bắt buộc.")
+    @NotBlank(message = "言語は必須です。")
     private String language; 
 
     // Giao diện (light, dark)
-    @NotBlank(message = "Theme là bắt buộc.")
+    @NotBlank(message = "テーマは必須です。")
     private String theme; 
 
     // Font chữ
-    @NotBlank(message = "Font là bắt buộc.")
+    @NotBlank(message = "フォントは必須です。")
     private String font; 
 
     // Màu nền mặc định cho slide/editor (ví dụ: #ffffff)

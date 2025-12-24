@@ -13,15 +13,15 @@ public class HelpService {
 
     // Mockup data (Trong thực tế, dữ liệu này sẽ đến từ database/CMS)
     private final List<HelpTopicResponse> mockData = Arrays.asList(
-        HelpTopicResponse.builder().id(1L).title("QuickSlideへようこそ").preview("Hướng dẫn cơ bản").category("getting-started").build(),
-        HelpTopicResponse.builder().id(2L).title("最初のスライドを作成する").preview("Tạo slide đầu tiên").category("getting-started").build(),
-        HelpTopicResponse.builder().id(3L).title("テンプレートの使い方").preview("Sử dụng Template").category("getting-started").build(),
+        HelpTopicResponse.builder().id(1L).title("QuickSlideへようこそ").preview("基本ガイド").category("getting-started").build(),
+        HelpTopicResponse.builder().id(2L).title("最初のスライドを作成する").preview("最初のスライド作成").category("getting-started").build(),
+        HelpTopicResponse.builder().id(3L).title("テンプレートの使い方").preview("テンプレートの利用").category("getting-started").build(),
         
-        HelpTopicResponse.builder().id(4L).title("アカウントの作成").preview("Đăng ký tài khoản mới").category("account").build(),
-        HelpTopicResponse.builder().id(5L).title("パスワードのリセット").preview("Khôi phục mật khẩu").category("account").build(),
+        HelpTopicResponse.builder().id(4L).title("アカウントの作成").preview("新規アカウント登録").category("account").build(),
+        HelpTopicResponse.builder().id(5L).title("パスワードのリセット").preview("パスワードの復元").category("account").build(),
         
-        HelpTopicResponse.builder().id(6L).title("クイック作成の使い方").preview("Sử dụng Quick Creation").category("guide").build(),
-        HelpTopicResponse.builder().id(7L).title("バッチ生成の活用").preview("Tạo slide hàng loạt").category("guide").build()
+        HelpTopicResponse.builder().id(6L).title("クイック作成の使い方").preview("クイック作成の利用").category("guide").build(),
+        HelpTopicResponse.builder().id(7L).title("バッチ生成の活用").preview("スライドの一括生成").category("guide").build()
     );
 
     // --- 1. Lấy danh sách Chủ đề theo Danh mục (No. 10 - ④, ⑤) ---

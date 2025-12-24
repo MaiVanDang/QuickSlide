@@ -13,8 +13,8 @@ import { AuthResponse } from '@/types/api/AuthResponses';
 
 // Định nghĩa Schema validation dựa trên luật nghiệp vụ (Bắt buộc nhập)
 const LoginSchema = z.object({
-  usernameOrEmail: z.string().min(1, 'Vui lòng nhập tên người dùng hoặc địa chỉ email'),
-  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
+  usernameOrEmail: z.string().min(1, 'ユーザー名またはメールアドレスを入力してください'),
+  password: z.string().min(1, 'パスワードを入力してください'),
 });
 
 type LoginRequest = z.infer<typeof LoginSchema>;
@@ -41,7 +41,7 @@ export function LoginForm() {
       if (!response.ok) {
         // Xử lý lỗi đăng nhập thất bại
         const errorData = await response.json();
-        const errorMessage = errorData.message || 'Tên người dùng hoặc mật khẩu không chính xác';
+        const errorMessage = errorData.message || 'ユーザー名またはパスワードが正しくありません';
         form.setError('root.serverError', { message: errorMessage });
         return;
       }
@@ -62,19 +62,19 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <h2 className="text-3xl text-gray-900 mb-2">Đăng Nhập</h2>
-        <p className="text-gray-600">Vui lòng đăng nhập vào tài khoản của bạn</p>
+        <h2 className="text-3xl text-gray-900 mb-2">ログイン</h2>
+        <p className="text-gray-600">アカウントにログインしてください</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 ">
           {/* Tên người dùng/Email */}
           <FormField
             control={form.control} name="usernameOrEmail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tên người dùng hoặc Email</FormLabel>
-                <FormControl><Input placeholder="Email hoặc tên người dùng" {...field} /></FormControl>
+                <FormLabel className="text-lg">ユーザー名</FormLabel>
+                <FormControl><Input placeholder="メールアドレスまたはユーザー名" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -85,8 +85,8 @@ export function LoginForm() {
             control={form.control} name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mật Khẩu</FormLabel>
-                <FormControl><Input type="password" placeholder="Nhập mật khẩu" {...field} /></FormControl>
+                <FormLabel className="text-lg">パスワード</FormLabel>
+                <FormControl><Input type="password" placeholder="パスワードを入力" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -97,13 +97,14 @@ export function LoginForm() {
                   {form.formState.errors.root.serverError.message}
               </p>
           )}
-
+      {/*
           <div className="flex items-center justify-between">
-            {/* Link Quên mật khẩu */}
+            
             <a href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
               パスワードをお忘れですか？
             </a>
-          </div>
+          </div> 
+      */}
 
           {/* Nút Đăng nhập - Luật AC3: Disabled cho đến khi cả hai trường có dữ liệu */}
           <Button

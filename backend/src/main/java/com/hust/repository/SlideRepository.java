@@ -16,6 +16,7 @@ public interface SlideRepository extends JpaRepository<Slide, Long> {
     // NEW: Đếm số lượng slide trong một Presentation (dùng để xác định index mới)
     long countByPresentationIdOrderBySlideIndexAsc(Long presentationId);
 
+    // Bulk detach/reassign layoutUsed to avoid FK violations when deleting TemplateSlide.
     @Modifying
     @Query("update Slide s set s.layoutUsed = :fallback where s.layoutUsed.id in :templateSlideIds")
     int reassignLayoutUsed(@Param("templateSlideIds") List<Long> templateSlideIds,

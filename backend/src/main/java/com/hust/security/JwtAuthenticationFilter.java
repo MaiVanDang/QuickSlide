@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                logger.warn("JWT Token không hợp lệ hoặc hết hạn: " + e.getMessage());
+                logger.warn("JWTトークンが無効、または期限切れです: " + e.getMessage());
             }
         }
 
@@ -73,9 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (UsernameNotFoundException ex) {
                 // Treat as invalid token → no auth; Security will return 401/403
-                logger.warn("User not found for JWT subject: {}", username);
+                logger.warn("JWT subject のユーザーが見つかりません: {}", username);
             } catch (Exception ex) {
-                logger.warn("JWT processing failed: {}", ex.getMessage());
+                logger.warn("JWT処理に失敗しました: {}", ex.getMessage());
             }
         }
 

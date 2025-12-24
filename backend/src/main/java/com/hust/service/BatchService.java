@@ -74,13 +74,13 @@ public class BatchService {
     public List<SlideDataDTO> parseFile(MultipartFile file, Long currentUserId) {
         
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("Tệp tải lên không được để trống.");
+            throw new IllegalArgumentException("アップロードされたファイルを空にできません。");
         }
         
         // Kiểm tra loại tệp (Business Rule: Chỉ chấp nhận Excel/CSV)
         String fileName = file.getOriginalFilename();
         if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
-            throw new IllegalArgumentException("Định dạng tệp không hợp lệ. Chỉ chấp nhận Excel (.xlsx, .xls).");
+            throw new IllegalArgumentException("ファイル形式が無効です。Excel（.xlsx / .xls）のみ対応しています。");
         }
         
         List<SlideDataDTO> dataList = new ArrayList<>();
@@ -114,7 +114,7 @@ public class BatchService {
                                 .name(name)
                                 .content(contentRaw)
                                 .error(true)
-                                .errorMessage("Không thể đọc nội dung từ link Google Docs (cần public hoặc đúng định dạng).")
+                                .errorMessage("Google Docs のリンクから内容を読み取れません（公開設定または形式を確認してください）。")
                                 .build());
                         continue;
                     }
@@ -134,7 +134,7 @@ public class BatchService {
                             .name(name)
                             .content(content)
                             .error(true)
-                            .errorMessage("Tên Slide hoặc Nội dung không được trống.")
+                            .errorMessage("スライドのタイトルまたは内容を空にできません。")
                             .build());
                 } else {
                     dataList.add(SlideDataDTO.builder()
@@ -146,12 +146,12 @@ public class BatchService {
             }
             
         } catch (IOException e) {
-            log.error("Lỗi khi đọc file Excel: {}", e.getMessage());
-            throw new RuntimeException("Không thể xử lý tệp Excel/CSV.");
+            log.error("Excel ファイルの読み取りエラー: {}", e.getMessage());
+            throw new RuntimeException("Excel/CSV ファイルを処理できません。");
         }
         
         if (dataList.isEmpty()) {
-            throw new IllegalArgumentException("Tệp không chứa dữ liệu slide hợp lệ.");
+            throw new IllegalArgumentException("ファイルに有効なスライドデータが含まれていません。");
         }
         return dataList;
     }
@@ -216,13 +216,13 @@ public class BatchService {
         
         // Kiểm tra quyền (Authorization)
         User owner = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。"));
         
         // Business Rule: Đảm bảo không có lỗi validation (isError = true)
         boolean hasCriticalErrors = request.getSlides().stream()
                 .anyMatch(SlideDataDTO::isError);
         if (hasCriticalErrors) {
-            throw new IllegalArgumentException("Dữ liệu chứa lỗi và không thể tạo slide. Vui lòng sửa lại tệp.");
+            throw new IllegalArgumentException("データにエラーがあるためスライドを作成できません。ファイルを修正してください。");
         }
         
         // 1) Resolve layout strategy
@@ -236,22 +236,22 @@ public class BatchService {
 
         if (templateId != null) {
             Template template = templateRepository.findById(templateId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+                    .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
             if (Boolean.FALSE.equals(template.getIsPublic())) {
                 if (template.getOwner() == null || template.getOwner().getId() == null
                         || !template.getOwner().getId().equals(currentUserId)) {
-                    throw new SecurityException("Bạn không có quyền sử dụng Template này.");
+                    throw new SecurityException("このテンプレートを使用する権限がありません。");
                 }
             }
 
             templateDeckSlides = templateSlideRepository.findByTemplateIdOrderBySlideOrderAsc(template.getId());
             if (templateDeckSlides == null || templateDeckSlides.isEmpty()) {
-                throw new IllegalArgumentException("Template này chưa có slide nào.");
+                throw new IllegalArgumentException("このテンプレートにはスライドがありません。");
             }
         } else {
             repeatedLayout = templateSlideRepository.findById(templateSlideId != null ? templateSlideId : 1L)
-                    .orElseThrow(() -> new ResourceNotFoundException("Layout Template không tồn tại."));
+                    .orElseThrow(() -> new ResourceNotFoundException("レイアウトテンプレートが存在しません。"));
         }
         
         Instant now = Instant.now();
@@ -264,11 +264,11 @@ public class BatchService {
                     ? meta.lesson
                     : (meta.subject != null && !meta.subject.isBlank())
                     ? meta.subject
-                    : (row.getName() == null ? "Batch Presentation" : row.getName());
+                    : (row.getName() == null ? "バッチプレゼンテーション" : row.getName());
 
             List<String> slideBlocks = splitSlideBlocks(row.getContent(), true);
             if (slideBlocks.isEmpty()) {
-                throw new IllegalArgumentException("Nội dung rỗng hoặc không hợp lệ cho bài: " + presentationTitle);
+                throw new IllegalArgumentException("次のプレゼンテーションの内容が空、または無効です: " + presentationTitle);
             }
 
             if (templateDeckSlides != null) {
@@ -276,13 +276,13 @@ public class BatchService {
                 if (slideBlocks.size() > maxSlides) {
                     // Create only up to template slide count, but return a warning to the client.
                     warnings.add(
-                            "Số lượng nội dung bạn gửi yêu cầu quá số lượng trang: "
+                            "送信された内容数がテンプレートのページ数を超えています: "
                                     + slideBlocks.size()
-                                    + " trang so với mẫu templates ở bài thuyết trình "
+                                    + "ページ（プレゼンテーション: "
                                     + presentationTitle
-                                    + " (mẫu có "
+                                    + "）。テンプレートは"
                                     + maxSlides
-                                    + " trang)."
+                                    + "ページです。"
                     );
                     slideBlocks = slideBlocks.subList(0, maxSlides);
                 }
@@ -300,7 +300,7 @@ public class BatchService {
                 String block = slideBlocks.get(i);
                 TitleAndBody parsed = parseTitleAndBodyFromBlock(block);
                 if (parsed.title == null || parsed.title.isBlank()) {
-                    throw new IllegalArgumentException("Thiếu title (dòng đầu) cho một slide trong bài: " + presentationTitle);
+                    throw new IllegalArgumentException("次のプレゼンテーションのスライドにタイトル（1行目）がありません: " + presentationTitle);
                 }
 
                 Slide slide = new Slide();

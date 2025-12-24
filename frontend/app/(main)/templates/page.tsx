@@ -83,7 +83,7 @@ function TemplateLibraryPageInner() {
       } else {
         console.error('Failed to fetch public templates', publicResult.reason);
         setPublicTemplates([]);
-        setError('Không tải được danh sách template công khai.');
+        setError('公開テンプレート一覧を読み込めませんでした。');
       }
 
       if (mineResult.status === 'fulfilled') {
@@ -95,7 +95,7 @@ function TemplateLibraryPageInner() {
       }
     } catch (err: any) {
       console.error('Failed to fetch templates', err);
-      setError('Không tải được danh sách template.');
+      setError('テンプレート一覧を読み込めませんでした。');
     } finally {
       setIsLoading(false);
     }
@@ -139,15 +139,15 @@ function TemplateLibraryPageInner() {
     if (!selectedTemplateId) return;
     try {
       await deleteTemplateApi(selectedTemplateId);
-      toast.success('Đã xóa template của bạn (public vẫn dùng được)');
+      toast.success('テンプレートを削除しました（公開ライブラリは引き続き利用できます）');
       setShowDeleteModal(false);
       setSelectedTemplateId(null);
       // Refetch: template public vẫn còn, template của tôi bị ẩn khỏi danh sách "mine"
       fetchTemplates();
     } catch (err) {
       console.error('Delete template failed', err);
-      setError('Xóa template thất bại');
-      toast.error('Xóa template thất bại');
+      setError('テンプレートの削除に失敗しました');
+      toast.error('テンプレートの削除に失敗しました');
     }
   };
 
@@ -158,17 +158,17 @@ function TemplateLibraryPageInner() {
       const slides = res.data || [];
       const first = slides[0];
       if (!first?.layoutJson) {
-        toast.error('Template này không có bố cục slide');
+        toast.error('このテンプレートにはスライドレイアウトがありません');
         return;
       }
       qcStorage.set(QC_LAYOUT_KEY, first.layoutJson);
       qcStorage.set(QC_TEMPLATE_ID_KEY, String(templateId));
       qcStorage.remove(QC_FORM_KEY);
-      toast.success('Đã chọn template cho Tạo slide nhanh');
+      toast.success('クイック作成用テンプレートを選択しました');
       router.push('/quick-create');
     } catch (err) {
       console.error('Choose template for quick-create failed', err);
-      toast.error('Chọn template thất bại');
+      toast.error('テンプレートの選択に失敗しました');
     } finally {
       setIsSelecting(false);
     }
@@ -181,16 +181,16 @@ function TemplateLibraryPageInner() {
       const slides = (res.data || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       const first = slides[0];
       if (!first?.layoutJson) {
-        toast.error('Template này không có bố cục slide');
+        toast.error('このテンプレートにはスライドレイアウトがありません');
         return;
       }
       qcStorage.set(BG_TEMPLATE_ID_KEY, String(templateId));
       qcStorage.remove(BG_TEMPLATE_SLIDE_ID_KEY);
-      toast.success('Đã chọn template cho Tạo slide hàng loạt');
+      toast.success('一括生成用テンプレートを選択しました');
       router.push('/batch-generation');
     } catch (err) {
       console.error('Choose template for batch-generation failed', err);
-      toast.error('Chọn template thất bại');
+      toast.error('テンプレートの選択に失敗しました');
     } finally {
       setIsSelecting(false);
     }
@@ -199,7 +199,7 @@ function TemplateLibraryPageInner() {
   const applyTemplateDeck = async (templateId: number) => {
     try {
       if (!hasAuthToken()) {
-        toast.error('Bạn cần đăng nhập để sử dụng template');
+        toast.error('テンプレートを使用するにはログインが必要です');
         router.push('/login');
         return;
       }
@@ -208,13 +208,13 @@ function TemplateLibraryPageInner() {
       const res = await createPresentationFromTemplateApi({ templateId });
       const created = res.data;
       if (!created?.id) {
-        toast.error('Tạo dự án từ template thất bại');
+        toast.error('テンプレートからの作成に失敗しました');
         return;
       }
       router.push(`/editor/presentations/${created.id}`);
     } catch (err) {
       console.error('Use template failed', err);
-      toast.error('Sử dụng template thất bại');
+      toast.error('テンプレートの使用に失敗しました');
     } finally {
       setIsUsingTemplate(false);
     }
@@ -265,6 +265,22 @@ function TemplateLibraryPageInner() {
 
   const normalizeTheme = (theme?: string) => (theme || 'default').trim().toLowerCase();
 
+  const getThemeLabel = (theme?: string) => {
+    const normalized = normalizeTheme(theme);
+    switch (normalized) {
+      case 'default':
+        return 'デフォルト';
+      case 'business':
+        return 'ビジネス';
+      case 'education':
+        return '教育';
+      case 'creative':
+        return 'クリエイティブ';
+      default:
+        return (theme ?? '').trim() || normalized;
+    }
+  };
+
   const availableThemes = React.useMemo(() => {
     const all = [...myTemplates, ...publicTemplates]
       .map((t) => normalizeTheme(t.theme))
@@ -300,7 +316,7 @@ function TemplateLibraryPageInner() {
           <div className="text-white/90 text-xs truncate">
             {template.ownerUsername}
             {template.createdAt ? ` · ${formatDate(template.createdAt)}` : ''}
-            {template.theme ? ` · ${template.theme}` : ''}
+            {template.theme ? ` · ${getThemeLabel(template.theme)}` : ''}
           </div>
         </div>
 
@@ -318,7 +334,7 @@ function TemplateLibraryPageInner() {
                 className="w-full bg-blue-600 hover:bg-blue-700 h-9"
               >
                 <Play className="w-4 h-4 mr-2" />
-                Chọn
+                選択
               </Button>
             ) : allowDelete && template.isOwner ? (
               <>
@@ -328,7 +344,7 @@ function TemplateLibraryPageInner() {
                   className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 h-9"
                 >
                   <Edit2 className="w-4 h-4 mr-2" />
-                  Chỉnh Sửa
+                  編集
                 </Button>
                 <Button
                   onClick={() => handleDelete(template.id)}
@@ -345,7 +361,7 @@ function TemplateLibraryPageInner() {
                 className="w-full bg-blue-600 hover:bg-blue-700 h-9"
               >
                 <Play className="w-4 h-4 mr-2" />
-                Sử Dụng
+                使用
               </Button>
             )}
           </div>
@@ -414,10 +430,7 @@ function TemplateLibraryPageInner() {
   };
 
   const filteredMyTemplates = React.useMemo(() => applySearchFilterSort(myTemplates), [myTemplates, searchQuery, themeFilter, sortKey]);
-  const filteredPublicTemplates = React.useMemo(
-    () => applySearchFilterSort(publicTemplates),
-    [publicTemplates, searchQuery, themeFilter, sortKey],
-  );
+  const filteredPublicTemplates = React.useMemo(() => applySearchFilterSort(publicTemplates), [publicTemplates, searchQuery, themeFilter, sortKey]);
 
   const myPageData = React.useMemo(() => paginate(filteredMyTemplates, myPage), [filteredMyTemplates, myPage]);
   const publicPageData = React.useMemo(() => paginate(filteredPublicTemplates, publicPage), [filteredPublicTemplates, publicPage]);
@@ -433,7 +446,7 @@ function TemplateLibraryPageInner() {
   return (
     <>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl text-gray-900">{selectMode ? 'Chọn Template' : 'Thư Viện Template'}</h1>
+        <h1 className="text-2xl text-gray-900">{selectMode ? 'テンプレートを選択' : 'テンプレートライブラリ'}</h1>
         <div className="flex items-center gap-4">
           {/* ① Search Templates */}
           <div className="relative">
@@ -442,7 +455,7 @@ function TemplateLibraryPageInner() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Templates"
+              placeholder="テンプレートを検索"
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 w-64 text-sm"
             />
           </div>
@@ -454,24 +467,24 @@ function TemplateLibraryPageInner() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel>Bộ lọc</DropdownMenuLabel>
+              <DropdownMenuLabel>フィルター</DropdownMenuLabel>
 
               <DropdownMenuRadioGroup value={themeFilter} onValueChange={setThemeFilter}>
-                <DropdownMenuRadioItem value="all">Theme: Tất cả</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="all">テーマ: すべて</DropdownMenuRadioItem>
                 {availableThemes.map((t) => (
                   <DropdownMenuRadioItem key={t} value={t}>
-                    Theme: {t}
+                    テーマ: {getThemeLabel(t)}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
 
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>Sắp xếp</DropdownMenuLabel>
+              <DropdownMenuLabel>並び替え</DropdownMenuLabel>
               <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as any)}>
-                <DropdownMenuRadioItem value="created-desc">Thời gian tạo: Mới nhất</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="created-asc">Thời gian tạo: Cũ nhất</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name-asc">Chữ cái: A → Z</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name-desc">Chữ cái: Z → A</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="created-desc">作成日時: 新しい順</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="created-asc">作成日時: 古い順</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="name-asc">名前: A → Z</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="name-desc">名前: Z → A</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -482,7 +495,7 @@ function TemplateLibraryPageInner() {
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Create New
+              新規作成
             </Button>
           )}
         </div>
@@ -490,12 +503,12 @@ function TemplateLibraryPageInner() {
 
       {/* ⑧ Template Tự Tạo */}
       <section className="mb-12">
-        <h2 className="text-xl mb-6 text-gray-900">Template Của Tôi</h2>
+        <h2 className="text-xl mb-6 text-gray-900">自分のテンプレート</h2>
         {error && (
           <p className="text-sm text-red-600 mb-4">{error}</p>
         )}
         {isLoading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500">読み込み中...</p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -510,9 +523,9 @@ function TemplateLibraryPageInner() {
 
       {/* ⑨ Template Công khai */}
       <section>
-        <h2 className="text-xl mb-6 text-gray-900">Template Công Khai</h2>
+        <h2 className="text-xl mb-6 text-gray-900">公開テンプレート</h2>
         {isLoading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500">読み込み中...</p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -529,19 +542,19 @@ function TemplateLibraryPageInner() {
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Xóa Template</DialogTitle>
+            <DialogTitle>テンプレートを削除</DialogTitle>
             <DialogDescription>
-              Bạn có chắc muốn xóa template này? Hành động này không thể hoàn tác.
+              このテンプレートを削除しますか？この操作は取り消せません。
               <br />
-              (Lưu ý: Template vẫn được lưu ở thư viện công khai)
+              （注意: テンプレートは公開ライブラリには残ります）
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-              Hủy
+              キャンセル
             </Button>
             <Button variant="destructive" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Xóa
+              削除
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -552,7 +565,7 @@ function TemplateLibraryPageInner() {
 
 export default function TemplateLibraryPage() {
   return (
-    <React.Suspense fallback={<p className="text-sm text-gray-500">Loading...</p>}>
+    <React.Suspense fallback={<p className="text-sm text-gray-500">読み込み中...</p>}>
       <TemplateLibraryPageInner />
     </React.Suspense>
   );

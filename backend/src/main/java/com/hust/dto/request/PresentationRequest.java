@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class PresentationRequest {
-    @NotBlank(message = "Presentation title is required")
+    @NotBlank(message = "プレゼンテーションのタイトルは必須です。")
     private String title;
     
     private String description;

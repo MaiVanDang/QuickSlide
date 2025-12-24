@@ -56,12 +56,12 @@ public class PresentationService {
     public PresentationResponse getPresentationDetails(Long projectId, Long currentUserId) {
         
         Presentation project = presentationRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Dự án không tồn tại: " + projectId));
+            .orElseThrow(() -> new ResourceNotFoundException("プロジェクトが存在しません: " + projectId));
 
         // BUSINESS RULE: Kiểm tra quyền truy cập.
         // Cần xử lý trường hợp currentUserId là null trước khi gọi hàm này
         if (currentUserId == null || !project.getOwner().getId().equals(currentUserId)) {
-             throw new SecurityException("Không có quyền truy cập dự án này.");
+               throw new SecurityException("このプロジェクトにアクセスする権限がありません。");
         }
         
         return toPresentationResponse(project);
@@ -71,26 +71,26 @@ public class PresentationService {
     @Transactional
     public PresentationResponse createPresentationFromTemplate(CreatePresentationFromTemplateRequest request, Long currentUserId) {
         if (currentUserId == null) {
-            throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+            throw new com.hust.exception.UnauthorizedException("ログインしていません。");
         }
 
         User owner = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。"));
 
         Template template = templateRepository.findById(request.getTemplateId())
-                .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
         // Template public ai cũng xem được; template private yêu cầu đúng owner.
         if (Boolean.FALSE.equals(template.getIsPublic())) {
             if (template.getOwner() == null || template.getOwner().getId() == null
                     || !template.getOwner().getId().equals(currentUserId)) {
-                throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+                throw new com.hust.exception.UnauthorizedException("ログインしていません。");
             }
         }
 
         List<TemplateSlide> templateSlides = templateSlideRepository.findByTemplateIdOrderBySlideOrderAsc(template.getId());
         if (templateSlides == null || templateSlides.isEmpty()) {
-            throw new IllegalArgumentException("Template này chưa có slide nào.");
+            throw new IllegalArgumentException("このテンプレートにはスライドがありません。");
         }
 
         Instant now = Instant.now();

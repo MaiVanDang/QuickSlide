@@ -1,17 +1,23 @@
--- TABLE: users
+-- QuickSlideP2 - Schema DDL (PostgreSQL)
+-- Generated from backend JPA entities under backend/src/main/java/com/hust/entity
+-- Note: Project currently uses Hibernate ddl-auto=update (no Flyway/Liquibase migrations found).
+
+BEGIN;
+
+-- 1) users
 CREATE TABLE IF NOT EXISTS users (
-    id            bigserial PRIMARY KEY,
-    username      varchar(255) NOT NULL,
-    email         varchar(255) NOT NULL,
+    id           bigserial PRIMARY KEY,
+    username     varchar(255) NOT NULL,
+    email        varchar(255) NOT NULL,
     password_hash varchar(255) NOT NULL,
     settings_json text,
-    created_at    timestamptz,
-    updated_at    timestamptz,
+    created_at   timestamptz,
+    updated_at   timestamptz,
     CONSTRAINT uk_users_username UNIQUE (username),
     CONSTRAINT uk_users_email UNIQUE (email)
 );
 
--- TABLE: themes
+-- 2) themes
 CREATE TABLE IF NOT EXISTS themes (
     id            bigserial PRIMARY KEY,
     name          varchar(255),
@@ -20,7 +26,7 @@ CREATE TABLE IF NOT EXISTS themes (
     is_public     boolean
 );
 
--- TABLE: templates
+-- 3) templates
 CREATE TABLE IF NOT EXISTS templates (
     id                bigserial PRIMARY KEY,
     owner_id          bigint NOT NULL,
@@ -34,9 +40,8 @@ CREATE TABLE IF NOT EXISTS templates (
     edited_at         timestamptz,
     CONSTRAINT fk_templates_owner FOREIGN KEY (owner_id) REFERENCES users (id)
 );
-CREATE INDEX IF NOT EXISTS idx_templates_owner_id ON templates(owner_id);
 
--- TABLE: template_slides
+-- 4) template_slides
 CREATE TABLE IF NOT EXISTS template_slides (
     id          bigserial PRIMARY KEY,
     template_id bigint NOT NULL,
@@ -45,9 +50,8 @@ CREATE TABLE IF NOT EXISTS template_slides (
     created_at  timestamptz,
     CONSTRAINT fk_template_slides_template FOREIGN KEY (template_id) REFERENCES templates (id)
 );
-CREATE INDEX IF NOT EXISTS idx_template_slides_template_id ON template_slides(template_id);
 
--- TABLE: presentations
+-- 5) presentations
 CREATE TABLE IF NOT EXISTS presentations (
     id                   bigserial PRIMARY KEY,
     owner_id             bigint NOT NULL,
@@ -58,10 +62,8 @@ CREATE TABLE IF NOT EXISTS presentations (
     CONSTRAINT fk_presentations_owner FOREIGN KEY (owner_id) REFERENCES users (id),
     CONSTRAINT fk_presentations_based_on_template FOREIGN KEY (based_on_template_id) REFERENCES templates (id)
 );
-CREATE INDEX IF NOT EXISTS idx_presentations_owner_id ON presentations(owner_id);
-CREATE INDEX IF NOT EXISTS idx_presentations_based_on_template_id ON presentations(based_on_template_id);
 
--- TABLE: slides
+-- 6) slides
 CREATE TABLE IF NOT EXISTS slides (
     id              bigserial PRIMARY KEY,
     presentation_id bigint NOT NULL,
@@ -72,18 +74,16 @@ CREATE TABLE IF NOT EXISTS slides (
     CONSTRAINT fk_slides_presentation FOREIGN KEY (presentation_id) REFERENCES presentations (id),
     CONSTRAINT fk_slides_layout_used FOREIGN KEY (layout_used_id) REFERENCES template_slides (id)
 );
-CREATE INDEX IF NOT EXISTS idx_slides_presentation_id ON slides(presentation_id);
-CREATE INDEX IF NOT EXISTS idx_slides_layout_used_id ON slides(layout_used_id);
 
--- TABLE: history_logs
+-- 7) history_logs
 CREATE TABLE IF NOT EXISTS history_logs (
     id          bigserial PRIMARY KEY,
     user_id     bigint NOT NULL,
     action_type varchar(255) NOT NULL,
     entity_type varchar(255),
     entity_id   bigint,
-    timestamp   timestamptz,
+    "timestamp"  timestamptz,
     CONSTRAINT fk_history_logs_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
-CREATE INDEX IF NOT EXISTS idx_history_logs_user_id ON history_logs(user_id);
 
+COMMIT;

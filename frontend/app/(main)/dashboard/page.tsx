@@ -130,7 +130,7 @@ function DashboardPageInner() {
           if (status === 401 || status === 403) {
             clearAuthToken();
             setRecentProjects([]);
-            setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            setError('セッションの有効期限が切れました。もう一度ログインしてください。');
             return;
           }
         }
@@ -173,7 +173,7 @@ function DashboardPageInner() {
         setRecentProjects(merged);
       } catch (err) {
         console.error('Failed to load recent projects', err);
-        setError('Không tải được danh sách dự án gần đây');
+        setError('最近のプロジェクト一覧を読み込めませんでした。');
       } finally {
         setIsLoading(false);
       }
@@ -208,12 +208,12 @@ function DashboardPageInner() {
     <div className="space-y-12">
       {/* ⑧ Khu vực Tùy chọn Tạo */}
       <section>
-        <h2 className="text-xl mb-6 text-gray-900">Tạo Mới</h2>
+        <h2 className="text-xl mb-6 text-gray-900">新規作成</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <CreationOption
             icon={Layout}
-            title="Template Editing"
-            description="Tạo template tùy chỉnh"
+            title="テンプレート編集"
+            description="カスタムテンプレートを作成"
             bgColor="bg-blue-100"
             hoverBgColor="bg-blue-200"
             textColor="text-blue-600"
@@ -221,8 +221,8 @@ function DashboardPageInner() {
           />
           <CreationOption
             icon={Zap}
-            title="Quick Creation"
-            description="Tạo slide nhanh chóng"
+            title="クイック作成"
+            description="スライドを素早く作成"
             bgColor="bg-green-100"
             hoverBgColor="bg-green-200"
             textColor="text-green-600"
@@ -230,8 +230,8 @@ function DashboardPageInner() {
           />
           <CreationOption
             icon={FileSpreadsheet}
-            title="Batch Generation"
-            description="Tạo nhiều slide cùng lúc"
+            title="バッチ生成"
+            description="複数のスライドをまとめて作成"
             bgColor="bg-purple-100"
             hoverBgColor="bg-purple-200"
             textColor="text-purple-600"
@@ -242,7 +242,7 @@ function DashboardPageInner() {
 
       {/* ⑨ Khu vực Dự án gần đây */}
       <section>
-        <h2 className="text-xl mb-6 text-gray-900">Dự Án Gần Đây</h2>
+        <h2 className="text-xl mb-6 text-gray-900">最近のプロジェクト</h2>
         <Card className="border border-gray-200 overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-4">
@@ -256,9 +256,9 @@ function DashboardPageInner() {
             <Table>
               <TableHeader className="bg-gray-50 border-b border-gray-200">
                 <TableRow>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Tên Dự Án</TableHead>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Tác Giả</TableHead>
-                  <TableHead className="px-6 py-3 text-sm text-gray-700">Ngày Chỉnh Sửa</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">プロジェクト名</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">作成者</TableHead>
+                  <TableHead className="px-6 py-3 text-sm text-gray-700">更新日時</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-200">

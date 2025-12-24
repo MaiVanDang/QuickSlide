@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Tìm kiếm User theo username hoặc email (JWT subject có thể là email)
         User user = userRepository.findByUsernameOrEmail(username, username)
             .orElseThrow(() -> new UsernameNotFoundException(
-                "Không tìm thấy người dùng với username/email: " + username
+                "ユーザー名/メールアドレスが見つかりません: " + username
             ));
 
         // Trả về UserDetails chuẩn của Spring Security

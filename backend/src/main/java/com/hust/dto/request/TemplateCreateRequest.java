@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class TemplateCreateRequest {
 
-    @NotBlank(message = "Tên template là bắt buộc.")
+    @NotBlank(message = "テンプレート名は必須です。")
     private String name;
 
     private String description;
@@ -25,7 +25,7 @@ public class TemplateCreateRequest {
 
     @Data
     public static class TemplateSlideRequest {
-        @NotBlank(message = "Layout JSON không được trống")
+        @NotBlank(message = "レイアウトJSONは必須です。")
         private String layoutJson; // Cấu trúc JSON chi tiết Element
         private Integer order;
     }

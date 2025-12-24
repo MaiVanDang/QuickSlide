@@ -8,18 +8,18 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
     
-    @NotBlank(message = "Tên người dùng không được để trống")
-    @Size(min = 6, max = 50, message = "Tên phải từ 6-50 ký tự")
+    @NotBlank(message = "ユーザー名は必須です。")
+    @Size(min = 6, max = 50, message = "ユーザー名は6〜50文字で入力してください。")
     private String username; 
     
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không đúng định dạng")
+    @NotBlank(message = "メールアドレスは必須です。")
+    @Email(message = "メールアドレスの形式が正しくありません。")
     private String email; 
     
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải từ 6 ký tự")
+    @NotBlank(message = "パスワードは必須です。")
+    @Size(min = 6, message = "パスワードは6文字以上で入力してください。")
     private String password;
     
-    @NotBlank(message = "Xác nhận mật khẩu không được để trống") 
+    @NotBlank(message = "確認用パスワードは必須です。") 
     private String confirmPassword; 
 }

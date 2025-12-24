@@ -90,7 +90,7 @@ function SaveExportPageInner() {
 
     try {
       if (!Number.isFinite(presentationId)) {
-        throw new Error('Thiếu presentationId để xuất file.');
+        throw new Error('ファイル出力に必要なpresentationIdがありません。');
       }
 
       const normalized = (selectedFormat || 'bin').toUpperCase();
@@ -180,9 +180,9 @@ function SaveExportPageInner() {
           try {
             const parsed = JSON.parse(text);
             const msg = parsed?.message || text;
-            alert(`Lỗi khi xuất file: ${msg}`);
+            alert(`出力エラー: ${msg}`);
           } catch {
-            alert(`Lỗi khi xuất file: ${text}`);
+            alert(`出力エラー: ${text}`);
           }
           return;
         } catch {
@@ -191,8 +191,8 @@ function SaveExportPageInner() {
       }
 
       const serverMsg = error?.response?.data?.message;
-      const msg = serverMsg || error?.message || 'Không xác định';
-      alert(`Lỗi khi xuất file: ${msg}`);
+      const msg = serverMsg || error?.message || '不明';
+      alert(`出力エラー: ${msg}`);
     } finally {
       setIsExporting(false);
     }
@@ -203,7 +203,7 @@ function SaveExportPageInner() {
     
     // Gửi yêu cầu lưu dự án tới API (PUT)
     console.log(`Saving project as: ${fileName}`);
-    alert(`Đã Lưu Dự Án: ${fileName}`);
+    alert(`プロジェクトを保存しました: ${fileName}`);
     // Vẫn ở màn hình hiện tại
   };
 
@@ -211,17 +211,17 @@ function SaveExportPageInner() {
     <div className="max-w-3xl mx-auto py-8">
       <Card className="border border-gray-200 p-8">
         <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl text-gray-900">Lưu và Xuất File</h2>
+          <h2 className="text-2xl text-gray-900">保存とエクスポート</h2>
             <Button onClick={() => router.back()} variant="ghost">
                 <BookOpen className="w-5 h-5 mr-2" />
-                Quay Lại Trình Biên Giập
+            エディターに戻る
             </Button>
         </div>
 
         {/* ② Định dạng Tệp */}
         <div className="mb-8">
           <Label className="block text-sm mb-3 text-gray-700">
-            Chọn Định Dạng <span className="text-red-500">*</span>
+            形式を選択 <span className="text-red-500">*</span>
           </Label>
           <div className="space-y-3">
             {['PDF', 'PNG', 'PPTX (PowerPoint)'].map((format) => (
@@ -255,25 +255,25 @@ function SaveExportPageInner() {
         {/* ③ Tên File */}
         <div className="mb-8">
           <Label htmlFor="fileName" className="block text-sm mb-2 text-gray-700">
-            Tên File <span className="text-red-500">*</span>
+            ファイル名 <span className="text-red-500">*</span>
           </Label>
           <Input
             id="fileName"
             type="text"
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
-            placeholder="Nhập tên file"
+            placeholder="ファイル名を入力"
           />
         </div>
 
         {/* ④ Font */}
         <div className="mb-8">
           <Label htmlFor="font" className="block text-sm mb-2 text-gray-700">
-            Font
+            フォント
           </Label>
           <Select onValueChange={setSelectedFont} defaultValue={selectedFont}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Chọn font" />
+              <SelectValue placeholder="フォントを選択" />
             </SelectTrigger>
             <SelectContent>
               {['Noto Sans JP', 'Yu Gothic', 'MS Gothic', 'Meiryo'].map((f) => (
@@ -293,7 +293,7 @@ function SaveExportPageInner() {
             className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 disabled:border-blue-300 disabled:text-blue-300"
           >
             <Save className="w-5 h-5 mr-2" />
-            Lưu
+            保存
           </Button>
           {/* ⑥ Nút Xuất */}
           <Button
@@ -302,16 +302,16 @@ function SaveExportPageInner() {
             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300"
           >
             <Download className="w-5 h-5 mr-2" />
-            {isExporting ? 'Đang Xuất...' : 'Xuất'}
+            {isExporting ? 'エクスポート中...' : 'エクスポート'}
           </Button>
         </div>
 
         {/* ⑦ Liên kết Hỗ trợ */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex gap-6 text-sm text-gray-600">
-            <a href="/help" className="hover:text-blue-600 transition-colors">Điều Khoản Sử Dụng</a>
-            <a href="/help" className="hover:text-blue-600 transition-colors">Chính Sách Riêng Tư</a>
-            <a href="/help" className="hover:text-blue-600 transition-colors">Hỗ Trợ Kỹ Thuật</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">利用規約</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">プライバシーポリシー</a>
+            <a href="/help" className="hover:text-blue-600 transition-colors">技術サポート</a>
           </div>
         </div>
       </Card>

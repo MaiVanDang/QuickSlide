@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class BatchGenerateRequest {
     
-    @NotEmpty(message = "Danh sách slide không được trống.")
+    @NotEmpty(message = "スライド一覧は必須です。")
     private List<SlideDataDTO> slides; // Dữ liệu đã được Frontend xác nhận
     
     // Tùy chọn: ID của Template (deck) được chọn để áp dụng bố cục theo từng slide.

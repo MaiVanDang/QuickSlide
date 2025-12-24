@@ -54,7 +54,7 @@ axiosClient.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Nếu nhận lỗi 401 UNAUTHORIZED (token hết hạn/không hợp lệ)
-      console.error('Hết phiên đăng nhập hoặc token không hợp lệ.');
+      console.error('ログインセッションが切れたか、トークンが無効です。');
       // Chuyển hướng người dùng về trang đăng nhập
       // window.location.href = '/login'; 
     }

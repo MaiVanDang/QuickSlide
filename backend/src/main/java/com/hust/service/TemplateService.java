@@ -6,6 +6,7 @@ import com.hust.entity.Template;
 import com.hust.entity.TemplateSlide;
 import com.hust.entity.User;
 import com.hust.exception.ResourceNotFoundException;
+import com.hust.repository.SlideRepository;
 import com.hust.repository.TemplateRepository;
 import com.hust.repository.TemplateSlideRepository;
 import com.hust.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class TemplateService {
 
     @Autowired private TemplateRepository templateRepository;
     @Autowired private TemplateSlideRepository templateSlideRepository;
+    @Autowired private SlideRepository slideRepository;
     @Autowired private UserRepository userRepository;
     // @Autowired private HistoryLogService historyLogService; // Giả định HistoryLogService
 
@@ -36,7 +39,7 @@ public class TemplateService {
 
         if ("mine".equalsIgnoreCase(type)) {
             if (currentUserId == null) {
-                throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+                throw new com.hust.exception.UnauthorizedException("ログインしていません。");
             }
             templates = templateRepository.findMineTemplatesOrderByRecency(currentUserId);
         } else if ("public".equalsIgnoreCase(type)) {
@@ -57,7 +60,7 @@ public class TemplateService {
     public TemplateResponse createNewTemplate(TemplateCreateRequest request, Long currentUserId) {
         // Lấy User từ DB để thiết lập Owner
         User owner = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại. Lỗi xác thực JWT."));
+            .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。JWT 認証エラー。"));
 
         Template template = new Template();
         template.setTheme(request.getTheme() == null || request.getTheme().isBlank() ? "default" : request.getTheme().trim());
@@ -95,13 +98,13 @@ public class TemplateService {
     @Transactional(readOnly = true)
     public TemplateResponse getTemplateById(Long templateId, Long currentUserId) {
         Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
         // Template public ai cũng xem được; template private yêu cầu đúng owner.
         if (Boolean.FALSE.equals(template.getIsPublic())) {
             if (currentUserId == null || template.getOwner() == null || template.getOwner().getId() == null
                     || !template.getOwner().getId().equals(currentUserId)) {
-                throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+                throw new com.hust.exception.UnauthorizedException("ログインしていません。");
             }
         }
 
@@ -112,15 +115,15 @@ public class TemplateService {
     @Transactional
     public TemplateResponse updateTemplate(Long templateId, TemplateCreateRequest request, Long currentUserId) {
         if (currentUserId == null) {
-            throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+            throw new com.hust.exception.UnauthorizedException("ログインしていません。");
         }
 
         Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
         if (template.getOwner() == null || template.getOwner().getId() == null
                 || !template.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Bạn không có quyền sửa Template này.");
+            throw new SecurityException("このテンプレートを編集する権限がありません。");
         }
 
         template.setName(request.getName());
@@ -135,16 +138,55 @@ public class TemplateService {
 
         Template savedTemplate = templateRepository.save(template);
 
-        // Thay toàn bộ danh sách slide mẫu
-        templateSlideRepository.deleteByTemplateId(templateId);
-        if (request.getSlides() != null && !request.getSlides().isEmpty()) {
-            request.getSlides().forEach(slideReq -> {
-                TemplateSlide slide = new TemplateSlide();
-                slide.setTemplate(savedTemplate);
-                slide.setLayoutJson(slideReq.getLayoutJson());
-                slide.setSlideOrder(slideReq.getOrder() != null ? slideReq.getOrder() : 0);
-                templateSlideRepository.save(slide);
-            });
+        // Update slides in-place to avoid deleting referenced TemplateSlide rows.
+        // Request DTO doesn't carry slide IDs, so we reconcile by index (order in request).
+        List<TemplateSlide> existingSlides = templateSlideRepository.findByTemplateIdOrderBySlideOrderAsc(templateId);
+        List<TemplateCreateRequest.TemplateSlideRequest> incomingSlides =
+                (request.getSlides() != null) ? request.getSlides() : List.of();
+
+        int incomingCount = incomingSlides.size();
+        int existingCount = (existingSlides != null) ? existingSlides.size() : 0;
+
+        // 1) Update existing slides by index.
+        int updateCount = Math.min(existingCount, incomingCount);
+        for (int i = 0; i < updateCount; i++) {
+            TemplateSlide slide = existingSlides.get(i);
+            TemplateCreateRequest.TemplateSlideRequest slideReq = incomingSlides.get(i);
+            slide.setLayoutJson(slideReq.getLayoutJson());
+            slide.setSlideOrder(slideReq.getOrder() != null ? slideReq.getOrder() : i);
+            templateSlideRepository.save(slide);
+        }
+
+        // 2) Append any new slides.
+        for (int i = updateCount; i < incomingCount; i++) {
+            TemplateCreateRequest.TemplateSlideRequest slideReq = incomingSlides.get(i);
+            TemplateSlide slide = new TemplateSlide();
+            slide.setTemplate(savedTemplate);
+            slide.setLayoutJson(slideReq.getLayoutJson());
+            slide.setSlideOrder(slideReq.getOrder() != null ? slideReq.getOrder() : i);
+            templateSlideRepository.save(slide);
+        }
+
+        // 3) Remove trailing slides if template deck shrank.
+        if (existingCount > incomingCount) {
+            List<Long> toDeleteIds = new ArrayList<>();
+            for (int i = incomingCount; i < existingCount; i++) {
+                TemplateSlide slide = existingSlides.get(i);
+                if (slide != null && slide.getId() != null) {
+                    toDeleteIds.add(slide.getId());
+                }
+            }
+
+            if (!toDeleteIds.isEmpty()) {
+                // Break FK references from slides.layout_used_id before deleting template_slides.
+                TemplateSlide fallbackLayout = templateSlideRepository.findById(1L).orElse(null);
+                if (fallbackLayout != null) {
+                    slideRepository.reassignLayoutUsed(toDeleteIds, fallbackLayout);
+                } else {
+                    slideRepository.clearLayoutUsed(toDeleteIds);
+                }
+                templateSlideRepository.deleteAllById(toDeleteIds);
+            }
         }
 
         return toTemplateResponse(savedTemplate, currentUserId);
@@ -154,12 +196,12 @@ public class TemplateService {
     @Transactional
     public void softDeleteTemplate(Long templateId, Long currentUserId) {
         Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
         // Kiểm tra quyền: Chỉ Owner mới được xóa mềm
         if (!template.getOwner().getId().equals(currentUserId)) {
             // Ném SecurityException (sẽ được GlobalExceptionHandler bắt và trả về 400 Bad Request)
-            throw new SecurityException("Bạn không có quyền xóa Template này.");
+            throw new SecurityException("このテンプレートを削除する権限がありません。");
         }
         
         template.setIsDeleted(true); 
@@ -173,13 +215,13 @@ public class TemplateService {
     @Transactional(readOnly = true)
     public List<com.hust.dto.response.TemplateSlideResponse> getTemplateSlides(Long templateId, Long currentUserId) {
         Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
         // Template public ai cũng xem được; template private yêu cầu đúng owner.
         if (Boolean.FALSE.equals(template.getIsPublic())) {
             if (currentUserId == null || template.getOwner() == null || template.getOwner().getId() == null
                     || !template.getOwner().getId().equals(currentUserId)) {
-                throw new com.hust.exception.UnauthorizedException("Chưa đăng nhập");
+                throw new com.hust.exception.UnauthorizedException("ログインしていません。");
             }
         }
 
@@ -210,7 +252,7 @@ public class TemplateService {
 
         String ownerUsername = (t.getOwner() != null && t.getOwner().getUsername() != null)
             ? t.getOwner().getUsername()
-            : "unknown";
+            : "不明";
 
         return TemplateResponse.builder()
                 .id(t.getId())

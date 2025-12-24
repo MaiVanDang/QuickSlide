@@ -7,9 +7,9 @@ import lombok.Data;
 public class LoginRequest {
     
     // Key này phải khớp với Frontend gửi lên (trong auth.ts)
-    @NotBlank(message = "Vui lòng nhập email hoặc tên đăng nhập")
+    @NotBlank(message = "メールアドレスまたはユーザー名を入力してください。")
     private String usernameOrEmail; 
 
-    @NotBlank(message = "Mật khẩu không được để trống")
+    @NotBlank(message = "パスワードは必須です。")
     private String password;
 }

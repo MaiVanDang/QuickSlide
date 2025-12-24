@@ -23,6 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +43,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -67,7 +73,7 @@ public class SlideService {
     public PresentationResponse createQuickSlide(QuickCreateRequest request, Long currentUserId) {
         
         User owner = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。"));
 
         // Hỗ trợ tạo nhiều slide bằng delimiter "---".
         // - Title: "Title 1 --- Title 2" => slide 1/2 có title tương ứng
@@ -81,19 +87,19 @@ public class SlideService {
         // 0) Nếu chọn template deck -> tạo nhiều slide dựa theo templateSlides
         if (request.getTemplateId() != null) {
             Template template = templateRepository.findById(request.getTemplateId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Template không tồn tại."));
+                    .orElseThrow(() -> new ResourceNotFoundException("テンプレートが存在しません。"));
 
             // Template public ai cũng xem được; template private yêu cầu đúng owner.
             if (Boolean.FALSE.equals(template.getIsPublic())) {
                 if (template.getOwner() == null || template.getOwner().getId() == null
                         || !template.getOwner().getId().equals(currentUserId)) {
-                    throw new SecurityException("Bạn không có quyền sử dụng Template này.");
+                    throw new SecurityException("このテンプレートを使用する権限がありません。");
                 }
             }
 
             List<TemplateSlide> templateSlides = templateSlideRepository.findByTemplateIdOrderBySlideOrderAsc(template.getId());
             if (templateSlides == null || templateSlides.isEmpty()) {
-                throw new IllegalArgumentException("Template này chưa có slide nào.");
+                throw new IllegalArgumentException("このテンプレートにはスライドがありません。");
             }
 
             // Nếu user đã tách content theo slide ("---"), ưu tiên map 1-1 theo index.
@@ -206,7 +212,7 @@ public class SlideService {
         if (!hasRequestLayout) {
             defaultLayout = templateSlideRepository.findById(1L)
                     .orElseGet(() -> {
-                        log.warn("Không tìm thấy TemplateSlide ID=1, sử dụng layout trống.");
+                        log.warn("TemplateSlide ID=1 が見つからないため、空のレイアウトを使用します。");
                         TemplateSlide fallback = new TemplateSlide();
                         fallback.setLayoutJson("{\"elements\": []}");
                         return fallback;
@@ -375,11 +381,11 @@ public class SlideService {
     public Slide addNewSlideToPresentation(Long projectId, Long currentUserId) {
         
         Presentation presentation = presentationRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Dự án không tồn tại: " + projectId));
+            .orElseThrow(() -> new ResourceNotFoundException("プロジェクトが存在しません: " + projectId));
 
         // Kiểm tra quyền: Chỉ Owner mới được thêm Slide
         if (!presentation.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Không có quyền thêm Slide vào dự án này.");
+            throw new SecurityException("このプロジェクトにスライドを追加する権限がありません。");
         }
         
         // Xác định Slide Index mới (INDEX = SLIDE_COUNT + 1)
@@ -416,10 +422,10 @@ public class SlideService {
         @Transactional(readOnly = true)
         public List<SlideResponse> getSlidesByPresentation(Long projectId, Long currentUserId) {
         Presentation presentation = presentationRepository.findById(projectId)
-            .orElseThrow(() -> new ResourceNotFoundException("Dự án không tồn tại: " + projectId));
+            .orElseThrow(() -> new ResourceNotFoundException("プロジェクトが存在しません: " + projectId));
 
         if (!presentation.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Không có quyền xem Slide của dự án này.");
+            throw new SecurityException("このプロジェクトのスライドを閲覧する権限がありません。");
         }
 
         return slideRepository.findByPresentationIdOrderBySlideIndexAsc(projectId)
@@ -436,13 +442,13 @@ public class SlideService {
     @Transactional
     public Slide updateSlideContent(Long slideId, SlideUpdateRequest request, Long currentUserId) {
         Slide slide = slideRepository.findById(slideId)
-                .orElseThrow(() -> new ResourceNotFoundException("Slide không tồn tại: " + slideId));
+            .orElseThrow(() -> new ResourceNotFoundException("スライドが存在しません: " + slideId));
 
         Presentation presentation = slide.getPresentation();
         
         // Kiểm tra quyền
         if (!presentation.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Không có quyền chỉnh sửa Slide này.");
+            throw new SecurityException("このスライドを編集する権限がありません。");
         }
         
         // Nếu frontend gửi contentJson đầy đủ (ví dụ đã chỉnh layout), ưu tiên dùng trực tiếp.
@@ -466,12 +472,12 @@ public class SlideService {
     @Transactional
     public void deleteSlideAndReindex(Long slideId, Long currentUserId) {
         Slide slideToDelete = slideRepository.findById(slideId)
-                .orElseThrow(() -> new ResourceNotFoundException("Slide không tồn tại: " + slideId));
+            .orElseThrow(() -> new ResourceNotFoundException("スライドが存在しません: " + slideId));
 
         Presentation presentation = slideToDelete.getPresentation();
         
         if (!presentation.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Không có quyền xóa Slide này.");
+            throw new SecurityException("このスライドを削除する権限がありません。");
         }
         
         Integer deletedIndex = slideToDelete.getSlideIndex();
@@ -495,10 +501,10 @@ public class SlideService {
     public Resource generateExportFile(Long projectId, SaveExportRequest request, Long currentUserId) {
         
         Presentation presentation = presentationRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Dự án không tồn tại."));
+            .orElseThrow(() -> new ResourceNotFoundException("プロジェクトが存在しません。"));
         
         if (!presentation.getOwner().getId().equals(currentUserId)) {
-            throw new SecurityException("Không có quyền xuất file dự án này.");
+            throw new SecurityException("このプロジェクトをエクスポートする権限がありません。");
         }
 
         String format = request.getFormats().get(0).toUpperCase(Locale.ROOT);
@@ -585,15 +591,45 @@ public class SlideService {
                         );
 
                         if ("image".equals(type)) {
-                            // Hỗ trợ tối thiểu: xuất placeholder dạng text cho khung ảnh.
+                            String imgUrl = structuredMode && structured != null ? structured.getAt(structured.images, slotIndex) : resolveElementText(el, data, "画像");
+                            if (imgUrl != null && imgUrl.startsWith("http")) {
+                                try {
+                                    HttpClient httpClient = HttpClient.newBuilder().build();
+                                    HttpRequest httpReq = HttpRequest.newBuilder().uri(URI.create(imgUrl)).build();
+                                    HttpResponse<byte[]> response = httpClient.send(httpReq, HttpResponse.BodyHandlers.ofByteArray());
+                                    try (java.io.InputStream in = new java.io.ByteArrayInputStream(response.body())) {
+                                        BufferedImage img = ImageIO.read(in);
+                                        if (img != null) {
+                                            java.io.ByteArrayOutputStream imgBytes = new java.io.ByteArrayOutputStream();
+                                            ImageIO.write(img, "png", imgBytes);
+                                            org.apache.poi.sl.usermodel.PictureData picData = ppt.addPicture(imgBytes.toByteArray(), org.apache.poi.sl.usermodel.PictureData.PictureType.PNG);
+                                            org.apache.poi.xslf.usermodel.XSLFPictureShape pic = pptSlide.createPicture(picData);
+                                            pic.setAnchor(anchor);
+                                            continue;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // Nếu lỗi thì vẽ placeholder text
+                                    org.apache.poi.xslf.usermodel.XSLFTextBox box = pptSlide.createTextBox();
+                                    box.setAnchor(anchor);
+                                    box.setVerticalAlignment(org.apache.poi.sl.usermodel.VerticalAlignment.MIDDLE);
+                                    org.apache.poi.xslf.usermodel.XSLFTextParagraph p = box.addNewTextParagraph();
+                                    p.setTextAlign(org.apache.poi.sl.usermodel.TextParagraph.TextAlign.CENTER);
+                                    org.apache.poi.xslf.usermodel.XSLFTextRun r = p.addNewTextRun();
+                                    r.setText("[画像]");
+                                    r.setFontFamily(fontFamily);
+                                    r.setBold(true);
+                                    continue;
+                                }
+                            }
+                            // Nếu không phải link http hoặc lỗi thì vẽ placeholder
                             org.apache.poi.xslf.usermodel.XSLFTextBox box = pptSlide.createTextBox();
                             box.setAnchor(anchor);
                             box.setVerticalAlignment(org.apache.poi.sl.usermodel.VerticalAlignment.MIDDLE);
                             org.apache.poi.xslf.usermodel.XSLFTextParagraph p = box.addNewTextParagraph();
                             p.setTextAlign(org.apache.poi.sl.usermodel.TextParagraph.TextAlign.CENTER);
                             org.apache.poi.xslf.usermodel.XSLFTextRun r = p.addNewTextRun();
-                            String img = structuredMode && structured != null ? structured.getAt(structured.images, slotIndex) : resolveElementText(el, data, "Ảnh");
-                            r.setText((img == null || img.isBlank()) ? "[Ảnh]" : img);
+                            r.setText((imgUrl == null || imgUrl.isBlank()) ? "[画像]" : imgUrl);
                             r.setFontFamily(fontFamily);
                             r.setBold(true);
                             continue;
@@ -640,7 +676,7 @@ public class SlideService {
                 return new ByteArrayResource(baos.toByteArray());
             } catch (Exception e) {
                 log.error("Failed to generate PPTX export", e);
-                throw new IllegalArgumentException("Xuất PPTX thất bại.");
+                throw new IllegalArgumentException("PPTX のエクスポートに失敗しました。");
             }
         }
 
@@ -652,7 +688,7 @@ public class SlideService {
             } catch (Exception e) {
                 log.error("Failed to generate PDF export", e);
                 String msg = e.getMessage();
-                throw new IllegalArgumentException("Xuất PDF thất bại" + (msg == null || msg.isBlank() ? "." : ": " + msg));
+                throw new IllegalArgumentException("PDF のエクスポートに失敗しました" + (msg == null || msg.isBlank() ? "." : ": " + msg));
             }
         }
 
@@ -663,11 +699,11 @@ public class SlideService {
                 return new ByteArrayResource(zip);
             } catch (Exception e) {
                 log.error("Failed to generate PNG export", e);
-                throw new IllegalArgumentException("Xuất PNG thất bại.");
+                throw new IllegalArgumentException("PNG のエクスポートに失敗しました。");
             }
         }
 
-        throw new IllegalArgumentException("Định dạng xuất chưa được hỗ trợ: " + format);
+        throw new IllegalArgumentException("未対応のエクスポート形式です: " + format);
     }
 
     private byte[] generatePngZipExport(Presentation presentation, List<Slide> slides, String fontFamily) throws IOException {
@@ -739,6 +775,33 @@ public class SlideService {
 
                         int slotIndex = slotIndexByElementId.getOrDefault(toInt(el.get("id"), -1), toSlotIndex(el.get("slotIndex")));
 
+                        if ("image".equals(type)) {
+                            String imgUrl = null;
+                            if (structuredMode && structured != null) {
+                                imgUrl = structured.getAt(structured.images, slotIndex);
+                            }
+                            if (imgUrl != null && imgUrl.startsWith("http")) {
+                                try {
+                                    HttpClient client = HttpClient.newBuilder().build();
+                                    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(imgUrl)).build();
+                                    HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+                                    try (java.io.InputStream in = new java.io.ByteArrayInputStream(response.body())) {
+                                        BufferedImage img = ImageIO.read(in);
+                                        if (img != null) {
+                                            g.drawImage(img, x, y, w, h, null);
+                                            continue;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // Nếu lỗi thì vẽ placeholder text
+                                    renderElementToGraphics(g, x, y, w, h, "[画像]", style, fontFamily);
+                                    continue;
+                                }
+                            }
+                            // Nếu không phải link http hoặc lỗi thì vẽ placeholder
+                            renderElementToGraphics(g, x, y, w, h, (imgUrl == null || imgUrl.isBlank()) ? "[画像]" : imgUrl, style, fontFamily);
+                            continue;
+                        }
                         String text;
                         if ("title".equals(type)) {
                             text = title;
@@ -758,19 +821,11 @@ public class SlideService {
                             } else {
                                 text = java.time.LocalDate.now().toString();
                             }
-                        } else if ("image".equals(type)) {
-                            if (structuredMode && structured != null) {
-                                String img = structured.getAt(structured.images, slotIndex);
-                                text = (img == null || img.isBlank()) ? "[Ảnh]" : img;
-                            } else {
-                                text = "[Ảnh]";
-                            }
                         } else {
                             text = asString(el.get("text"));
                             if (text.contains("title")) text = title;
                             if (text.contains("content")) text = content;
                         }
-
                         renderElementToGraphics(g, x, y, w, h, text, style, fontFamily);
                     }
                 } finally {
@@ -878,18 +933,40 @@ public class SlideService {
                                 text = java.time.LocalDate.now().toString();
                             }
                         } else if ("image".equals(type)) {
+                            String imgUrl = null;
                             if (structuredMode && structured != null) {
-                                String img = structured.getAt(structured.images, slotIndex);
-                                text = (img == null || img.isBlank()) ? "[Ảnh]" : img;
-                            } else {
-                                text = "[Ảnh]";
+                                imgUrl = structured.getAt(structured.images, slotIndex);
                             }
+                            if (imgUrl != null && imgUrl.startsWith("http")) {
+                                try {
+                                    HttpClient client = HttpClient.newBuilder().build();
+                                    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(imgUrl)).build();
+                                    HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+                                    try (java.io.InputStream in = new java.io.ByteArrayInputStream(response.body())) {
+                                        BufferedImage img = ImageIO.read(in);
+                                        if (img != null) {
+                                            PDImageXObject pdImage = org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory.createFromImage(doc, img);
+                                            float yPdf = height - (y + h);
+                                            cs.drawImage(pdImage, x, yPdf, w, h);
+                                            continue;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // Nếu lỗi thì vẽ placeholder
+                                    PDFont font = selectPdfFontForText("[画像]", latinFont, cjkFont);
+                                    renderElementToPdf(cs, font, x, y, w, h, "[画像]", style, height);
+                                    continue;
+                                }
+                            }
+                            // Nếu không phải link http hoặc lỗi thì vẽ placeholder
+                            PDFont font = selectPdfFontForText((imgUrl == null || imgUrl.isBlank()) ? "[画像]" : imgUrl, latinFont, cjkFont);
+                            renderElementToPdf(cs, font, x, y, w, h, (imgUrl == null || imgUrl.isBlank()) ? "[画像]" : imgUrl, style, height);
+                            continue;
                         } else {
                             text = asString(el.get("text"));
                             if (text.contains("title")) text = title;
                             if (text.contains("content")) text = content;
                         }
-
                         PDFont font = selectPdfFontForText(text, latinFont, cjkFont);
                         renderElementToPdf(cs, font, x, y, w, h, text, style, height);
                     }

@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class CreatePresentationFromTemplateRequest {
 
-    @NotNull(message = "templateId is required")
+    @NotNull(message = "templateId は必須です。")
     private Long templateId;
 
     // Optional: if omitted, backend will use template name.

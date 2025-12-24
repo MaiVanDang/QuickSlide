@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @Data
 public class SlideContentRequest {
-    @NotBlank(message = "Slide ID is required")
+    @NotBlank(message = "スライドIDは必須です。")
     private Long slideId;
     
     private String title;

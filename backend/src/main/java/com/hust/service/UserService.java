@@ -25,7 +25,7 @@ public class UserService {
     // --- 1. Lấy Cài đặt hiện tại (Settings.tsx load) ---
     public UserSettingsResponse getCurrentSettings(Long currentUserId) {
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại."));
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。"));
 
         if (user.getSettingsJson() == null || user.getSettingsJson().isEmpty()) {
             // Trả về cài đặt mặc định nếu chưa có
@@ -45,7 +45,7 @@ public class UserService {
                     .autoSaveEnabled(request.getAutoSaveEnabled())
                     .build();
         } catch (JsonProcessingException e) {
-            log.error("Lỗi khi đọc JSON Settings cho User {}: {}", currentUserId, e.getMessage());
+            log.error("User {} の設定JSON読み取りエラー: {}", currentUserId, e.getMessage());
             return getDefaultSettings();
         }
     }
@@ -54,7 +54,7 @@ public class UserService {
     @Transactional
     public UserSettingsResponse updateSettings(UserSettingsRequest request, Long currentUserId) {
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại."));
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザーが存在しません。"));
         
         try {
             // Serialize Request Object thành JSON String
@@ -76,7 +76,7 @@ public class UserService {
                     .build();
 
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Lỗi định dạng dữ liệu cài đặt JSON.");
+            throw new IllegalArgumentException("設定JSONデータの形式が正しくありません。");
         }
     }
     

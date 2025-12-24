@@ -34,6 +34,7 @@ export default function BatchGenerationPage() {
   const [isUploading, setIsUploading] = React.useState(false);
   const [templateId, setTemplateId] = React.useState<number | null>(null);
   const [templateSlideId, setTemplateSlideId] = React.useState<number | null>(null);
+  const hasSelectedTemplate = templateId != null || templateSlideId != null;
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -55,15 +56,15 @@ export default function BatchGenerationPage() {
     setFileName(selectedFile.name);
     setIsUploading(true);
 
-    const loadingId = toast.loading('Đang tải lên và đọc dữ liệu...');
+    const loadingId = toast.loading('アップロードしてデータを読み込んでいます...');
 
     try {
       // API: POST /api/batch/upload (multipart/form-data)
       const res = await uploadBatchFileApi(selectedFile);
       setSlideData((res.data || []) as any);
-      toast.success('Tải file dữ liệu thành công', { id: loadingId });
+      toast.success('データファイルの読み込みに成功しました', { id: loadingId });
     } catch (error) {
-      toast.error('Tải lên hoặc phân tích file thất bại.', { id: loadingId });
+      toast.error('アップロードまたは解析に失敗しました。', { id: loadingId });
       setSlideData([]);
       setFile(null);
       setFileName('');
@@ -74,7 +75,7 @@ export default function BatchGenerationPage() {
 
   const handleGenerate = async () => {
     if (slideData.length === 0) {
-      toast.error('Vui lòng tải file Excel trước khi tạo.');
+      toast.error('生成する前にExcelファイルをアップロードしてください。');
       return;
     }
 
@@ -89,18 +90,18 @@ export default function BatchGenerationPage() {
       ...(templateId ? null : templateSlideId ? { templateSlideId } : null),
     };
 
-    const loadingId = toast.loading('Đang xử lý tạo slide hàng loạt...');
+    const loadingId = toast.loading('一括スライド生成を処理中...');
 
     try {
       const res = await generateBatchSlidesApi(data);
       const created = Array.isArray(res?.data) ? res.data : [];
       const first = created[0] ?? null;
-      if (!first?.id) throw new Error('Không nhận được ID thuyết trình từ API.');
+      if (!first?.id) throw new Error('APIからプレゼンテーションIDを受け取れませんでした。');
 
       const warningHeader = (res as any)?.headers?.['x-batch-warning'] as string | undefined;
       if (warningHeader) {
         // Still create presentations, but inform user that some content was truncated.
-        toast.warning('Một số nội dung đã bị cắt bớt theo mẫu template', { description: warningHeader });
+        toast.warning('テンプレートの仕様により、一部の内容が省略されました', { description: warningHeader });
       }
 
       // Lưu danh sách bài thuyết trình được tạo để editor có thể chuyển qua lại.
@@ -117,11 +118,11 @@ export default function BatchGenerationPage() {
       );
       qcStorage.set(BG_CREATED_PRESENTATIONS_INDEX_KEY, '0');
 
-      toast.success(`Tạo dữ liệu hoàn tất (${created.length} bài thuyết trình)`, {
+      toast.success(`生成が完了しました（${created.length} 件のプレゼンテーション）`, {
         id: loadingId,
         description:
           created.length > 1
-            ? 'Đang mở bài đầu tiên. Vào editor, dùng nút “Bài thuyết trình” (Prev/Next) ở sidebar trái để chuyển qua lại.'
+            ? '最初のプレゼンテーションを開いています。エディターで左サイドバーの「プレゼンテーション」（Prev/Next）ボタンを使って切り替えられます。'
             : undefined,
       });
       router.push(`/editor/presentations/${first.id}`);
@@ -147,7 +148,7 @@ export default function BatchGenerationPage() {
         }
       }
       toast.error(
-        `Đọc/Tạo dữ liệu thất bại: ${serverMessage || (error instanceof Error ? error.message : 'Lỗi không xác định.')}`,
+        `読み込み/生成に失敗しました: ${serverMessage || (error instanceof Error ? error.message : '不明なエラーです。')}`,
         { id: loadingId },
       );
     }
@@ -161,8 +162,8 @@ export default function BatchGenerationPage() {
             <FileSpreadsheet className="w-6 h-6 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-2xl text-gray-900">Tạo Slide Hàng Loạt</h2>
-            <p className="text-gray-600">Nhập dữ liệu để tạo nhiều slide cùng lúc</p>
+            <h2 className="text-2xl text-gray-900">スライドバッチ生成</h2>
+            <p className="text-gray-600">データを入力して複数のスライドをまとめて生成します</p>
           </div>
         </div>
 
@@ -170,15 +171,18 @@ export default function BatchGenerationPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm text-gray-700">
-              Excel File <span className="text-red-500">*</span>
+              Excelファイル <span className="text-red-500">*</span>
             </label>
             <Button
               type="button"
-              variant="outline"
-              className="border-gray-300 hover:bg-gray-50"
+              className={
+                hasSelectedTemplate
+                  ? 'px-6 py-3 h-12 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+                  : 'px-6 py-3 h-12 bg-blue-200 text-blue-900 rounded-lg hover:bg-blue-300'
+              }
               onClick={() => router.push('/templates?select=batch-generation')}
             >
-              Chọn mẫu templates
+              テンプレートを選択
             </Button>
           </div>
           <div className="flex gap-3">
@@ -203,7 +207,20 @@ export default function BatchGenerationPage() {
             </label>
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            対応形式: .xlsx, .xls
+             内容の入力方法については、次のようなルールがあります。
+             <br/>
+             入力した内容は、Excelまたは公開されたGoogleドキュメントのリンクに保存することが可能です。
+                    <br />
+                    <br />
+                    ・1行目は、デフォルトでタイトルの設定となります。
+                    <br />
+                    ・タイトルの入力が終わったら、必ず「Enter」キーを押して改行してください。
+                    <br />
+                    ・それ以降の内容は「画像リンク --&gt; 注釈 --&gt; 内容 --&gt; 時間」の順で読み取られます。
+                    <br />
+                    ・「\\--」を使用すると、次の属性へ移動します。
+                    <br />
+                    ・「\-」を使用すると、同じ属性内の次の項目へ移動します。
           </p>
         </div>
 

@@ -29,15 +29,15 @@ public class SecurityUtil {
     public static Long getCurrentUserId() {
         String username = getCurrentUsername();
         if (username == null || username.isBlank()) {
-            throw new UnauthorizedException("Chưa đăng nhập");
+            throw new UnauthorizedException("ログインしていません。");
         }
 
         if (userRepository == null) {
-            throw new IllegalStateException("UserRepository chưa được khởi tạo trong SecurityUtil");
+            throw new IllegalStateException("SecurityUtil 内でUserRepositoryが初期化されていません");
         }
 
         User user = userRepository.findByUsernameOrEmail(username, username)
-            .orElseThrow(() -> new SecurityException("Không tìm thấy người dùng hiện tại"));
+            .orElseThrow(() -> new SecurityException("現在のユーザーが見つかりません。"));
         return user.getId();
     }
 }

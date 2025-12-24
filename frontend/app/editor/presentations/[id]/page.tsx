@@ -60,7 +60,7 @@ const FALLBACK_ELEMENTS: TemplateElement[] = [
     y: 40,
     w: 720,
     h: 90,
-    text: 'Tiêu đề',
+    text: 'タイトル',
     style: {
       color: '#111827',
       fontFamily: 'inherit',
@@ -79,7 +79,7 @@ const FALLBACK_ELEMENTS: TemplateElement[] = [
     y: 150,
     w: 720,
     h: 360,
-    text: 'Nội dung',
+    text: '内容',
     style: {
       color: '#111827',
       fontFamily: 'inherit',
@@ -189,7 +189,7 @@ const resolveElementText = (
   // Default behavior: prefer auto-filled batch/import content when available.
   if (assignedTextByElementId.has(el.id)) return assignedTextByElementId.get(el.id) ?? '';
   if (el.type === 'date') return new Date().toLocaleDateString();
-  if (el.type === 'image') return '[Ảnh]';
+  if (el.type === 'image') return '[画像]';
 
   if (lower.includes('subject')) return typeof data.subject === 'string' ? data.subject : '';
   if (lower.includes('lesson')) return typeof data.lesson === 'string' ? data.lesson : '';
@@ -265,7 +265,7 @@ export default function SlideEditorPage() {
             setHasChanges(false);
           } catch (e) {
             console.error('Failed to load slides', e);
-            setError('Không tải được danh sách slide.');
+            setError('スライド一覧を読み込めませんでした。');
           } finally {
             setIsLoading(false);
           }
@@ -322,7 +322,7 @@ export default function SlideEditorPage() {
       const setSlideIndexSafe = (nextIndex: number) => {
         if (nextIndex === currentSlideIndex) return;
         if (hasChanges) {
-          const ok = window.confirm('Bạn có thay đổi chưa lưu. Chuyển slide sẽ mất thay đổi. Tiếp tục?');
+          const ok = window.confirm('未保存の変更があります。スライドを切り替えると変更が失われます。続行しますか？');
           if (!ok) return;
           setHasChanges(false);
         }
@@ -414,7 +414,7 @@ export default function SlideEditorPage() {
             setHasChanges(false);
           } catch (e) {
             console.error('Add slide failed', e);
-            alert('Thêm slide thất bại.');
+            alert('スライドの追加に失敗しました。');
           }
         };
         run();
@@ -438,7 +438,7 @@ export default function SlideEditorPage() {
             setHasChanges(false);
           } catch (e) {
             console.error('Delete slide failed', e);
-            alert('Xóa slide thất bại.');
+            alert('スライドの削除に失敗しました。');
           }
         };
         run();
@@ -448,7 +448,7 @@ export default function SlideEditorPage() {
         if (!currentSlide) return;
 
         const data = slideData || {};
-        const title = (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' ? data.name : `Slide ${currentSlideIndex + 1}`);
+        const title = (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' ? data.name : `スライド ${currentSlideIndex + 1}`);
         const content = typeof data.content === 'string' ? data.content : '';
 
         const layoutKey = parsedCurrent.layoutKey;
@@ -463,13 +463,13 @@ export default function SlideEditorPage() {
           setHasChanges(false);
         } catch (e) {
           console.error('Save slide failed', e);
-          alert('Lưu slide thất bại.');
+          alert('スライドの保存に失敗しました。');
         }
       };
 
       const handleFinish = () => {
         if (hasChanges) {
-          alert('Lưu thay đổi trước khi hoàn tất.');
+          alert('完了する前に変更を保存してください。');
           return;
         }
         router.push(`/save-export?presentationId=${presentationId}`);
@@ -488,7 +488,7 @@ export default function SlideEditorPage() {
         if (nextIndex < 0 || nextIndex >= batchNav.items.length) return;
 
         if (hasChanges) {
-          const ok = window.confirm('Bạn có thay đổi chưa lưu. Chuyển bài thuyết trình sẽ mất thay đổi. Tiếp tục?');
+          const ok = window.confirm('未保存の変更があります。プレゼンを切り替えると変更が失われます。続行しますか？');
           if (!ok) return;
           setHasChanges(false);
         }
@@ -510,7 +510,7 @@ export default function SlideEditorPage() {
             const idx = Math.max(0, (el.slotIndex ?? 1) - 1);
             if (el.type === 'text') map.set(el.id, structured.texts[idx] ?? '');
             else if (el.type === 'caption') map.set(el.id, structured.captions[idx] ?? '');
-            else if (el.type === 'image') map.set(el.id, structured.images[idx] ?? '[Ảnh]');
+            else if (el.type === 'image') map.set(el.id, structured.images[idx] ?? '[画像]');
             else if (el.type === 'date') map.set(el.id, structured.dates[idx] ?? new Date().toLocaleDateString());
           }
           return map;
@@ -528,7 +528,7 @@ export default function SlideEditorPage() {
       const getSlideLabel = (slide: SlideModel) => {
         const parsed = parseSlideContentJson(slide?.contentJson);
         const data = parsed.data || {};
-        return (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' && data.name) || `Slide ${slide.slideIndex}`;
+        return (typeof data.title === 'string' && data.title) || (typeof data.name === 'string' && data.name) || `スライド ${slide.slideIndex}`;
       };
 
       return (
@@ -536,22 +536,22 @@ export default function SlideEditorPage() {
           <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <button onClick={handleExit} aria-label="Thoát" className="text-blue-600 hover:text-blue-700">
+                <button onClick={handleExit} aria-label="終了" className="text-blue-600 hover:text-blue-700">
                   <BookOpen className="w-6 h-6" />
                 </button>
-                <h1 className="text-xl text-gray-900">Xem trước & Chỉnh sửa</h1>
+                <h1 className="text-xl text-gray-900">プレビュー＆編集</h1>
               </div>
               <div className="flex items-center gap-3">
                 <Button onClick={handleExit} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
                   <X className="w-4 h-4 mr-2" />
-                  Hủy
+                  キャンセル
                 </Button>
                 <Button onClick={handleSave} disabled={!hasChanges} className="bg-green-600 hover:bg-green-700 disabled:bg-green-300">
                   <Save className="w-4 h-4 mr-2" />
-                  Lưu
+                  保存
                 </Button>
                 <Button onClick={handleFinish} className="bg-blue-600 hover:bg-blue-700">
-                  Hoàn Thành
+                  完了
                 </Button>
               </div>
             </div>
@@ -562,11 +562,11 @@ export default function SlideEditorPage() {
               <div className="p-4">
                 {batchNav && (
                   <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                    <div className="text-xs text-gray-500 mb-2">Bài thuyết trình</div>
+                    <div className="text-xs text-gray-500 mb-2">プレゼンテーション</div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <div className="text-sm text-gray-900 font-medium truncate">
-                          {batchNav.items[batchNav.index]?.title || `Bài ${batchNav.index + 1}`}
+                          {batchNav.items[batchNav.index]?.title || `第${batchNav.index + 1}回`}
                         </div>
                         <div className="text-xs text-gray-500">
                           {batchNav.index + 1}/{batchNav.items.length}
@@ -579,7 +579,7 @@ export default function SlideEditorPage() {
                           className="h-8 px-2 border-gray-300"
                           disabled={batchNav.index <= 0}
                           onClick={() => goToBatchPresentation(batchNav.index - 1)}
-                          aria-label="Bài trước"
+                          aria-label="前へ"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </Button>
@@ -589,7 +589,7 @@ export default function SlideEditorPage() {
                           className="h-8 px-2 border-gray-300"
                           disabled={batchNav.index >= batchNav.items.length - 1}
                           onClick={() => goToBatchPresentation(batchNav.index + 1)}
-                          aria-label="Bài tiếp theo"
+                          aria-label="次へ"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </Button>
@@ -599,14 +599,14 @@ export default function SlideEditorPage() {
                 )}
 
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm text-gray-700">Danh Sách Slide</h3>
+                  <h3 className="text-sm text-gray-700">スライド一覧</h3>
                   <Button onClick={handleAddSlide} variant="ghost" size="icon" className="p-1 hover:bg-gray-100">
                     <Plus className="w-5 h-5 text-blue-600" />
                   </Button>
                 </div>
 
                 {isLoading ? (
-                  <div className="text-sm text-gray-500">Loading...</div>
+                  <div className="text-sm text-gray-500">読み込み中...</div>
                 ) : error ? (
                   <div className="text-sm text-red-600">{error}</div>
                 ) : (
@@ -622,8 +622,8 @@ export default function SlideEditorPage() {
                             : 'bg-gray-50 border-transparent hover:bg-gray-100')
                         }
                       >
-                        <div className="text-xs text-gray-500 mb-1">Slide {index + 1}</div>
-                        <div className="text-sm text-gray-900 truncate font-medium">{getSlideLabel(slide) || '(No Title)'}</div>
+                        <div className="text-xs text-gray-500 mb-1">スライド {index + 1}</div>
+                        <div className="text-sm text-gray-900 truncate font-medium">{getSlideLabel(slide) || '（無題）'}</div>
                       </button>
                     ))}
                   </div>
@@ -632,7 +632,7 @@ export default function SlideEditorPage() {
                 <div className="mt-4">
                   <Button onClick={handleDeleteSlide} disabled={slides.length === 1} variant="outline" className="w-full border-red-600 text-red-600 hover:bg-red-50">
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Xóa slide
+                    スライドを削除
                   </Button>
                 </div>
               </div>
@@ -642,11 +642,11 @@ export default function SlideEditorPage() {
               <div className={selectedElement ? 'h-full grid grid-cols-1 lg:grid-cols-[1fr_340px]' : 'h-full'}>
                 <div className="h-full overflow-auto p-6">
                   {isLoading ? (
-                    <div className="text-sm text-gray-500">Loading...</div>
+                    <div className="text-sm text-gray-500">読み込み中...</div>
                   ) : error ? (
                     <div className="text-sm text-red-600">{error}</div>
                   ) : !currentSlide ? (
-                    <div className="text-sm text-gray-500">Không có slide.</div>
+                    <div className="text-sm text-gray-500">スライドがありません。</div>
                   ) : (
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
                       <div
@@ -715,11 +715,11 @@ export default function SlideEditorPage() {
                 <aside className="h-full border-l border-gray-200 bg-white overflow-auto p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <div className="text-sm text-gray-900 font-medium">Chỉnh sửa dữ liệu</div>
-                      <div className="text-xs text-gray-500">Sửa nội dung import (không cần sửa lại Excel)</div>
+                      <div className="text-sm text-gray-900 font-medium">データ編集</div>
+                      <div className="text-xs text-gray-500">インポート内容を修正（Excelを再編集不要）</div>
                     </div>
                     {selectedElement ? (
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedElementId(null)} className="hover:bg-gray-100" aria-label="Bỏ chọn placeholder">
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedElementId(null)} className="hover:bg-gray-100" aria-label="プレースホルダーの選択解除">
                         <X className="w-4 h-4" />
                       </Button>
                     ) : null}
@@ -728,7 +728,7 @@ export default function SlideEditorPage() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="col-span-2">
-                        <Label>Tiêu đề (title)</Label>
+                        <Label>タイトル</Label>
                         <Input
                           value={String((slideData?.title ?? slideData?.name ?? '') as any)}
                           onChange={(e) => {
@@ -736,11 +736,11 @@ export default function SlideEditorPage() {
                             setSlideData((prev) => ({ ...(prev || {}), title: next }));
                             setHasChanges(true);
                           }}
-                          placeholder="Tiêu đề slide"
+                          placeholder="スライドのタイトル"
                         />
                       </div>
                       <div>
-                        <Label>Môn (subject)</Label>
+                        <Label>科目</Label>
                         <Input
                           value={String((slideData?.subject ?? '') as any)}
                           onChange={(e) => {
@@ -748,11 +748,11 @@ export default function SlideEditorPage() {
                             setSlideData((prev) => ({ ...(prev || {}), subject: next }));
                             setHasChanges(true);
                           }}
-                          placeholder="Ví dụ: Tiếng Nhật"
+                          placeholder="例：日本語"
                         />
                       </div>
                       <div>
-                        <Label>Bài (lesson)</Label>
+                        <Label>課</Label>
                         <Input
                           value={String((slideData?.lesson ?? '') as any)}
                           onChange={(e) => {
@@ -760,11 +760,11 @@ export default function SlideEditorPage() {
                             setSlideData((prev) => ({ ...(prev || {}), lesson: next }));
                             setHasChanges(true);
                           }}
-                          placeholder="Ví dụ: 第1課"
+                          placeholder="例：第1課"
                         />
                       </div>
                       <div className="col-span-2">
-                        <Label>Nội dung (content)</Label>
+                        <Label>内容</Label>
                         <Textarea
                           value={String((slideData?.content ?? '') as any)}
                           onChange={(e) => {
@@ -773,9 +773,9 @@ export default function SlideEditorPage() {
                             setHasChanges(true);
                           }}
                           rows={6}
-                          placeholder="Nội dung được import từ Excel (có thể sửa trực tiếp ở đây)"
+                          placeholder="Excelからインポートした内容（ここで直接修正できます）"
                         />
-                        <div className="text-xs text-gray-500 mt-1">Gợi ý: xuống dòng để tách đoạn; nội dung sẽ tự đổ vào các ô text/caption.</div>
+                        <div className="text-xs text-gray-500 mt-1">ヒント：改行で段落を分割すると、内容が テキスト/キャプション の枠に自動で割り当てられます。</div>
                       </div>
                     </div>
 
@@ -783,7 +783,7 @@ export default function SlideEditorPage() {
                       <>
                         <div className="h-px bg-gray-200" />
                         <div>
-                          <div className="text-sm text-gray-900 font-medium">Thuộc tính placeholder</div>
+                          <div className="text-sm text-gray-900 font-medium">プレースホルダーの属性</div>
                           <div className="text-xs text-gray-500">{selectedElement.type}</div>
                         </div>
 
@@ -831,7 +831,7 @@ export default function SlideEditorPage() {
                       </div>
 
                       <div>
-                        <Label>Text (placeholder)</Label>
+                        <Label>テキスト（placeholder）</Label>
                         <Input
                           value={selectedElement.text || ''}
                           onChange={(e) =>
@@ -848,12 +848,12 @@ export default function SlideEditorPage() {
                             })
                           }
                         />
-                        <div className="text-xs text-gray-500 mt-1">Ví dụ: {'{{subject}}'}, {'{{lesson}}'}, {'{{date}}'}</div>
+                        <div className="text-xs text-gray-500 mt-1">例：{'{{subject}}'}、{'{{lesson}}'}、{'{{date}}'}</div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label>Font size</Label>
+                          <Label>フォントサイズ</Label>
                           <Input
                             value={String(selectedElement.style?.fontSize ?? 16)}
                             onChange={(e) =>
@@ -865,11 +865,11 @@ export default function SlideEditorPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="element-align">Align</Label>
+                          <Label htmlFor="element-align">配置</Label>
                           <select
                             id="element-align"
-                            aria-label="Align"
-                            title="Align"
+                            aria-label="配置"
+                            title="配置"
                             className="w-full h-10 rounded-md border border-gray-300 bg-white px-3 text-sm"
                             value={selectedElement.style?.align || 'left'}
                             onChange={(e) =>
@@ -879,15 +879,15 @@ export default function SlideEditorPage() {
                               }))
                             }
                           >
-                            <option value="left">Left</option>
-                            <option value="center">Center</option>
-                            <option value="right">Right</option>
+                            <option value="left">左</option>
+                            <option value="center">中央</option>
+                            <option value="right">右</option>
                           </select>
                         </div>
                       </div>
 
                       <div>
-                        <Label>Color</Label>
+                        <Label>色</Label>
                         <Input
                           value={selectedElement.style?.color || '#111827'}
                           onChange={(e) =>
@@ -905,26 +905,26 @@ export default function SlideEditorPage() {
                           className={selectedElement.style?.bold ? 'border-blue-600 text-blue-600' : ''}
                           onClick={() => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, bold: !el.style.bold } }))}
                         >
-                          Bold
+                          太字
                         </Button>
                         <Button
                           variant="outline"
                           className={selectedElement.style?.italic ? 'border-blue-600 text-blue-600' : ''}
                           onClick={() => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, italic: !el.style.italic } }))}
                         >
-                          Italic
+                          斜体
                         </Button>
                         <Button
                           variant="outline"
                           className={selectedElement.style?.underline ? 'border-blue-600 text-blue-600' : ''}
                           onClick={() => updateElement(selectedElement.id, (el) => ({ ...el, style: { ...el.style, underline: !el.style.underline } }))}
                         >
-                          Underline
+                          下線
                         </Button>
                       </div>
                       </>
                     ) : (
-                      <div className="text-sm text-gray-500">Chọn một placeholder để chỉnh vị trí/kích thước/font.</div>
+                      <div className="text-sm text-gray-500">プレースホルダーを選択して、位置／サイズ／フォントを調整できます。</div>
                     )}
                   </div>
                 </aside>
@@ -935,15 +935,15 @@ export default function SlideEditorPage() {
           <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Xóa slide?</DialogTitle>
-                <DialogDescription>Slide này sẽ bị xóa vĩnh viễn.</DialogDescription>
+                <DialogTitle>スライドを削除しますか？</DialogTitle>
+                <DialogDescription>このスライドは完全に削除されます。</DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-                  Hủy
+                  キャンセル
                 </Button>
                 <Button className="bg-red-600 hover:bg-red-700" onClick={confirmDelete}>
-                  Xóa
+                  削除
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -952,15 +952,15 @@ export default function SlideEditorPage() {
           <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Hủy thay đổi?</DialogTitle>
-                <DialogDescription>Bạn có thay đổi chưa lưu. Bạn có chắc muốn thoát?</DialogDescription>
+                <DialogTitle>変更を破棄しますか？</DialogTitle>
+                <DialogDescription>未保存の変更があります。終了してもよろしいですか？</DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowExitModal(false)}>
-                  Ở lại
+                  続ける
                 </Button>
                 <Button className="bg-red-600 hover:bg-red-700" onClick={() => router.push('/dashboard')}>
-                  Thoát
+                  終了
                 </Button>
               </DialogFooter>
             </DialogContent>

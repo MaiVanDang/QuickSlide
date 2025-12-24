@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuickSlide - Tạo Slide Học Tập",
-  description: "Tạo bài thuyết trình dễ dàng, nhanh chóng và đơn giản",
+  title: "QuickSlide - 学習用スライド作成",
+  description: "簡単・スピーディーにプレゼンテーションを作成",
 };
 
 export default function RootLayout({

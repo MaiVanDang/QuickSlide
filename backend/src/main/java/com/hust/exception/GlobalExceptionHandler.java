@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
     // ========================================================================
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParams(MissingServletRequestParameterException ex, WebRequest request) {
-        return buildError(HttpStatus.BAD_REQUEST, "Missing parameter: " + ex.getParameterName(), request);
+        return buildError(HttpStatus.BAD_REQUEST, "必須パラメータが不足しています: " + ex.getParameterName(), request);
     }
 
     // ========================================================================
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
     // ========================================================================
     @ExceptionHandler(MissingPathVariableException.class)
     public ResponseEntity<ErrorResponse> handleMissingPath(MissingPathVariableException ex, WebRequest request) {
-        return buildError(HttpStatus.BAD_REQUEST, "Missing path variable: " + ex.getVariableName(), request);
+        return buildError(HttpStatus.BAD_REQUEST, "必須のパス変数が不足しています: " + ex.getVariableName(), request);
     }
 
     // ========================================================================
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
     // ========================================================================
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoHandler(NoHandlerFoundException ex, WebRequest request) {
-        return buildError(HttpStatus.NOT_FOUND, "Không tìm thấy đường dẫn: " + ex.getRequestURL(), request);
+        return buildError(HttpStatus.NOT_FOUND, "パスが見つかりません: " + ex.getRequestURL(), request);
     }
 
     // ========================================================================
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     // ========================================================================
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex, WebRequest request) {
-        return buildError(HttpStatus.NOT_FOUND, "Không tìm thấy đường dẫn", request);
+        return buildError(HttpStatus.NOT_FOUND, "パスが見つかりません", request);
     }
 
     // ========================================================================
@@ -139,7 +139,7 @@ public class GlobalExceptionHandler {
 
         return buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Lỗi hệ thống: " + ex.getMessage(),
+            "システムエラー: " + ex.getMessage(),
                 request
         );
     }

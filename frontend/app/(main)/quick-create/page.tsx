@@ -83,19 +83,19 @@ const defaultBoxFor = (type: ElementType) => {
 const defaultTextFor = (type: ElementType, preset?: 'subject' | 'lesson', slotIndex?: number) => {
   const suffix = typeof slotIndex === 'number' ? ` #${slotIndex}` : '';
   if (type === 'variable') {
-    if (preset === 'subject') return '{{subject}}';
-    if (preset === 'lesson') return '{{lesson}}';
+    if (preset === 'subject') return '{{科目}}';
+    if (preset === 'lesson') return '{{授業}}';
     return '{{variable}}';
   }
   switch (type) {
     case 'title':
-      return 'Tiêu đề';
+      return 'タイトル';
     case 'text':
-      return `Nội dung${suffix}`;
+      return `内容${suffix}`;
     case 'image':
-      return `Ảnh${suffix}`;
+      return `画像${suffix}`;
     case 'caption':
-      return `Chú thích ảnh${suffix}`;
+      return `画像キャプション${suffix}`;
     case 'date':
       return '{{date}}';
     default:
@@ -655,25 +655,25 @@ export default function QuickCreatePlaceholderPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-gray-900">Tạo bố cục (Placeholder)</h1>
-          <p className="text-sm text-gray-600">Tạo bố cục mới hoặc chọn từ thư viện template</p>
+          <h1 className="text-2xl text-gray-900">レイアウト作成</h1>
+          <p className="text-sm text-gray-600">新しいレイアウトを作成するか、テンプレートライブラリから選択</p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button onClick={() => router.push('/dashboard')} variant="outline" className="border-gray-300">
-            Hủy
+            キャンセル
           </Button>
           <Button onClick={cycleAutoLayout} variant="outline" className="border-gray-300" disabled={isTemplateMode || elements.length === 0}>
             <Shuffle className="w-4 h-4 mr-2" />
-            Auto layout
+            自動レイアウト
           </Button>
           <Button onClick={chooseTemplateFromLibrary} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
             <LayoutIcon className="w-4 h-4 mr-2" />
-            Chọn template
+            テンプレートを選択
           </Button>
           <Button onClick={saveLayoutAndContinue} disabled={elements.length === 0} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
-            Lưu & Tiếp tục
+            保存して続行
           </Button>
         </div>
       </div>
@@ -686,8 +686,8 @@ export default function QuickCreatePlaceholderPage() {
         {showSlideNav && (
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="text-sm text-gray-700 mb-3">
-              Slides: {slideCount}
-              {isTemplateMode && isLoadingTemplateSlides ? ' (đang tải...)' : ''}
+              スライド: {slideCount}
+              {isTemplateMode && isLoadingTemplateSlides ? '（読み込み中...）' : ''}
             </div>
             <div className="space-y-2">
               {Array.from({ length: slideCount }).map((_, idx) => (
@@ -698,7 +698,7 @@ export default function QuickCreatePlaceholderPage() {
                   className={idx === activeSlideIndex ? 'w-full justify-start bg-blue-600 hover:bg-blue-700' : 'w-full justify-start border-gray-300'}
                   onClick={() => loadSlideAtIndex(idx)}
                 >
-                  Slide {idx + 1}
+                  スライド {idx + 1}
                 </Button>
               ))}
             </div>
@@ -764,15 +764,15 @@ export default function QuickCreatePlaceholderPage() {
 
         <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
           <div>
-            <div className="text-sm text-gray-700 mb-2">Thêm placeholder</div>
+            <div className="text-sm text-gray-700 mb-2">プレースホルダーを追加</div>
 
             {!isTemplateMode && (
               <div className="flex items-center gap-2 mb-3">
                 <Button type="button" variant="outline" className="border-gray-300" onClick={addSlide}>
-                  Thêm slide
+                  スライドを追加
                 </Button>
                 <Button type="button" variant="outline" className="border-gray-300" disabled={slideCount <= 1} onClick={deleteSlide}>
-                  Xóa slide
+                  スライドを削除
                 </Button>
               </div>
             )}
@@ -780,27 +780,27 @@ export default function QuickCreatePlaceholderPage() {
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" className="justify-start" onClick={() => addElement('title')} disabled={isTemplateMode}>
                 <Type className="w-4 h-4 mr-2" />
-                Title
+                タイトル
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => addElement('text')} disabled={isTemplateMode}>
-                Nội dung
+                内容
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => addElement('image')} disabled={isTemplateMode}>
                 <ImageIcon className="w-4 h-4 mr-2" />
-                Ảnh
+                画像
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => addElement('caption')} disabled={isTemplateMode}>
-                Chú thích
+                キャプション
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => addElement('variable', 'subject')} disabled={isTemplateMode}>
-                {'{{subject}}'}
+                {'{{科目}}'}
               </Button>
               <Button variant="outline" className="justify-start" onClick={() => addElement('variable', 'lesson')} disabled={isTemplateMode}>
-                {'{{lesson}}'}
+                {'{{授業}}'}
               </Button>
               <Button variant="outline" className="justify-start col-span-2" onClick={() => addElement('date')} disabled={isTemplateMode}>
                 <Calendar className="w-4 h-4 mr-2" />
-                Ngày
+                日付
               </Button>
             </div>
           </div>
@@ -808,15 +808,15 @@ export default function QuickCreatePlaceholderPage() {
           {selectedElement ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">Đang chọn: {selectedElement.type}</div>
+                <div className="text-sm text-gray-700">選択中: {selectedElement.type}</div>
                 <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50" onClick={deleteSelected} disabled={isTemplateMode}>
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Xóa
+                  削除
                 </Button>
               </div>
 
               <div className="space-y-2">
-                <Label>Nội dung hiển thị</Label>
+                <Label>表示内容</Label>
                 <Input
                   value={selectedElement.text || ''}
                   disabled={isTemplateMode}
@@ -825,10 +825,10 @@ export default function QuickCreatePlaceholderPage() {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">Chọn một placeholder để chỉnh sửa.</p>
+            <p className="text-sm text-gray-500">編集するプレースホルダーを選択してください。</p>
           )}
 
-          {hasChanges && <p className="text-xs text-gray-500">Bạn có thay đổi chưa lưu.</p>}
+          {hasChanges && <p className="text-xs text-gray-500">未保存の変更があります。</p>}
         </div>
       </div>
     </div>
