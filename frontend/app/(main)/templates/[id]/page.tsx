@@ -1223,8 +1223,13 @@ export default function TemplateEditorPage() {
         <ResizablePanel defaultSize={65} minSize={40} className="bg-gray-50 p-8 overflow-auto">
           <div
             ref={canvasRef}
-            className="bg-white rounded-lg shadow-lg mx-auto relative overflow-hidden"
-            style={{ width: `${CANVAS_W}px`, height: `${CANVAS_H}px` }}
+            className="rounded-lg shadow-lg mx-auto relative overflow-hidden"
+            style={{
+              width: `${CANVAS_W}px`,
+              height: `${CANVAS_H}px`,
+              background: '#40E0D0', // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
+              border: '1px solid #e2e8f0',
+            }}
             onMouseMove={onMouseMoveCanvas}
             onMouseUp={onMouseUpCanvas}
             onMouseDown={() => setSelectedElementId(null)}
@@ -1405,8 +1410,13 @@ export default function TemplateEditorPage() {
 
           <div className="bg-gray-50 p-4 rounded-lg overflow-auto">
             <div
-              className="bg-white rounded-lg shadow-lg mx-auto relative overflow-hidden"
-              style={{ width: `${CANVAS_W}px`, height: `${CANVAS_H}px` }}
+              className="rounded-lg shadow-lg mx-auto relative overflow-hidden"
+              style={{
+                width: `${CANVAS_W}px`,
+                height: `${CANVAS_H}px`,
+                background: '#40E0D0', // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
+                border: '1px solid #e2e8f0',
+              }}
             >
               <div className="absolute inset-0 bg-grid-pattern opacity-5" />
               {renderCanvasElements(true)}

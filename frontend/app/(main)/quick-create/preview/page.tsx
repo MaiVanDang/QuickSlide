@@ -403,7 +403,14 @@ export default function QuickCreatePreviewPage() {
 
       <Card className="border border-gray-200 p-6 bg-white">
         <div className="mx-auto relative" style={{ width: CANVAS_W, height: CANVAS_H }}>
-          <div className="absolute inset-0 rounded-lg border border-dashed border-gray-200" />
+          {/* Sửa nền slide tại đây */}
+          <div
+            className="absolute inset-0 rounded-lg shadow-md overflow-hidden"
+            style={{
+              background: 'linear-gradient(to bottom right, #ffffff, #f0f9ff)',
+              border: '1px solid #e2e8f0'
+            }}
+          />
 
           {formData && (() => {
             const globalParsed = parseTitleAndBodyFromBlock(formData.content);
