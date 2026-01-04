@@ -651,11 +651,11 @@ export default function SlideEditorPage() {
                     <div className="bg-white border border-gray-200 rounded-xl p-4">
                       <div
                         ref={canvasRef}
-                        className="relative mx-auto select-none rounded-lg shadow-lg overflow-hidden"
+                        className="relative mx-auto select-none rounded-lg shadow-lg overflow-hidden bg-cover bg-center"
                         style={{
                           width: CANVAS_W,
                           height: CANVAS_H,
-                          background: '#40E0D0', // <-- ĐÃ ĐỔI THÀNH MÀU NGỌC LAM TƯƠI SÁNG
+                          backgroundImage: "url('/image/image (1).png')", // <-- ĐÃ ĐỔI THÀNH MÀU NGỌC LAM TƯƠI SÁNG
                           border: '1px solid #e2e8f0',
                         }}
                         onMouseMove={onMouseMoveCanvas}

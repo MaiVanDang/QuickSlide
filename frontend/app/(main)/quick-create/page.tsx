@@ -715,7 +715,12 @@ export default function QuickCreatePlaceholderPage() {
             onMouseLeave={onMouseUpCanvas}
             onMouseDown={() => (isTemplateMode ? null : setSelectedElementId(null))}
           >
-            <div className="absolute inset-0 rounded-lg border border-dashed border-gray-200" />
+            <div className="absolute inset-0 rounded-lg border border-dashed border-gray-200 bg-cover bg-center" 
+                  style={{
+                    backgroundImage: "url('/image/image (1).png')",
+                    border: '1px solid #e2e8f0'
+                  }}
+            />
 
             {elements.map((el) => {
               const isSelected = el.id === selectedElementId;

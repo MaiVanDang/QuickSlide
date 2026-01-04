@@ -405,13 +405,12 @@ export default function QuickCreatePreviewPage() {
         <div className="mx-auto relative" style={{ width: CANVAS_W, height: CANVAS_H }}>
           {/* Sửa nền slide tại đây */}
           <div
-            className="absolute inset-0 rounded-lg shadow-md overflow-hidden"
+            className="absolute inset-0 rounded-lg shadow-md overflow-hidden bg-center bg-cover"
             style={{
-              background: 'linear-gradient(to bottom right, #ffffff, #f0f9ff)',
+              backgroundImage: "url('/image/image (1).png')",
               border: '1px solid #e2e8f0'
             }}
           />
-
           {formData && (() => {
             const globalParsed = parseTitleAndBodyFromBlock(formData.content);
             const globalTitle = globalParsed.title ?? '';

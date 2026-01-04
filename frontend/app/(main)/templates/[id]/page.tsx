@@ -1223,11 +1223,11 @@ export default function TemplateEditorPage() {
         <ResizablePanel defaultSize={65} minSize={40} className="bg-gray-50 p-8 overflow-auto">
           <div
             ref={canvasRef}
-            className="rounded-lg shadow-lg mx-auto relative overflow-hidden"
+            className="rounded-lg shadow-lg mx-auto relative overflow-hidden bg-cover bg-center"
             style={{
               width: `${CANVAS_W}px`,
               height: `${CANVAS_H}px`,
-              background: '#40E0D0', // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
+              backgroundImage: "url('/image/image (1).png')", // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
               border: '1px solid #e2e8f0',
             }}
             onMouseMove={onMouseMoveCanvas}
@@ -1410,11 +1410,11 @@ export default function TemplateEditorPage() {
 
           <div className="bg-gray-50 p-4 rounded-lg overflow-auto">
             <div
-              className="rounded-lg shadow-lg mx-auto relative overflow-hidden"
+              className="rounded-lg shadow-lg mx-auto relative overflow-hidden bg-cover bg-center"
               style={{
                 width: `${CANVAS_W}px`,
                 height: `${CANVAS_H}px`,
-                background: '#40E0D0', // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
+                backgroundImage: "url('/image/image (1).png')", // <-- ĐÃ SỬA: Màu nền Ngọc Lam Tươi Sáng
                 border: '1px solid #e2e8f0',
               }}
             >
